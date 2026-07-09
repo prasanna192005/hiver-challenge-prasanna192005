@@ -30,6 +30,8 @@ import re
 import sys
 import time
 
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
 import google.generativeai as genai
 from dotenv import load_dotenv
 
@@ -37,7 +39,7 @@ load_dotenv()
 
 genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
 
-MODEL = os.getenv("DATASET_MODEL", "gemini-3.5-flash")
+MODEL = os.getenv("DATASET_MODEL", "gemini-3.1-flash-lite")
 
 CATEGORIES = ["billing", "shipping", "refund", "bug", "churn-risk"]
 

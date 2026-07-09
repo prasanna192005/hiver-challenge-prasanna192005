@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hiver AI Email Eval — Report</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3354;
+      --accent: #6c63ff;
+      --accent2: #00d4aa;
+      --accent3: #ff6b6b;
+      --text: #e4e6f0;
+      --text-muted: #8b93b5;
+      --green: #22c55e;
+      --yellow: #f59e0b;
+      --red: #ef4444;
+      --orange: #f97316;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    .header {
+      background: linear-gradient(135deg, #1a1d27 0%, #12152b 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 2rem 3rem;
+    }
+    .header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #6c63ff, #00d4aa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.25rem;
+    }
+    .header .subtitle { color: var(--text-muted); font-size: 0.9rem; }
+    .container { max-width: 1600px; margin: 0 auto; padding: 2rem 3rem; }
+    
+    /* Metric Cards */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .metric-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(108,99,255,0.15); }
+    .metric-card .label { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    .metric-card .value { font-size: 2rem; font-weight: 700; }
+    .metric-card .sub { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .value.good { color: var(--green); }
+    .value.warn { color: var(--yellow); }
+    .value.bad  { color: var(--red); }
+    .value.accent { color: var(--accent); }
+    .value.accent2 { color: var(--accent2); }
+
+    /* Sections */
+    .section { margin-bottom: 2.5rem; }
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent2);
+      border-left: 3px solid var(--accent2);
+      padding-left: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Compare cards */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .compare-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+    .compare-card h3 { font-size: 0.95rem; margin-bottom: 1rem; }
+    .compare-card.normal h3 { color: var(--accent2); }
+    .compare-card.adversarial h3 { color: var(--accent3); }
+    .score-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+    .score-row .dim { font-size: 0.85rem; color: var(--text-muted); }
+    .score-bar { flex: 1; margin: 0 1rem; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+    .score-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
+    .score-val { font-size: 0.85rem; font-weight: 600; min-width: 30px; text-align: right; }
+
+    /* Failure mode table */
+    .failure-table {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+    .failure-table table { width: 100%; border-collapse: collapse; }
+    .failure-table th {
+      background: var(--surface2);
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+    .failure-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .failure-table tr:last-child td { border-bottom: none; }
+    .failure-table tr:hover td { background: var(--surface2); }
+    .tag {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .tag-red { background: rgba(239,68,68,0.15); color: #f87171; }
+    .tag-orange { background: rgba(249,115,22,0.15); color: #fb923c; }
+    .tag-yellow { background: rgba(245,158,11,0.15); color: #fbbf24; }
+    .tag-purple { background: rgba(108,99,255,0.15); color: #a78bfa; }
+    .tag-green { background: rgba(34,197,94,0.15); color: #4ade80; }
+    .tag-gray { background: rgba(139,147,181,0.15); color: #8b93b5; }
+    .tag-blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+
+    /* Main table */
+    .main-table-wrapper {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .table-scroll { overflow-x: auto; }
+    table.main { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    table.main th {
+      background: var(--surface2);
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+    }
+    table.main th:hover { color: var(--accent2); }
+    table.main td {
+      padding: 0.7rem 1rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      max-width: 320px;
+    }
+    table.main tr:last-child td { border-bottom: none; }
+    table.main tr:hover td { background: rgba(108,99,255,0.04); }
+    table.main tr.adversarial td { border-left: 3px solid var(--accent3); }
+    table.main tr.abstained td { opacity: 0.6; }
+    .msg-cell { max-width: 300px; }
+    .msg-truncate {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      color: var(--text-muted);
+      cursor: help;
+    }
+    .score-chip {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+    .sc-5 { background: rgba(34,197,94,0.2); color: #4ade80; }
+    .sc-4 { background: rgba(132,204,22,0.15); color: #a3e635; }
+    .sc-3 { background: rgba(245,158,11,0.15); color: #fbbf24; }
+    .sc-2 { background: rgba(249,115,22,0.15); color: #fb923c; }
+    .sc-1 { background: rgba(239,68,68,0.2); color: #f87171; }
+
+    /* Outcome badge */
+    .outcome-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+    .ob-resolved { background: rgba(34,197,94,0.15); color: #4ade80; }
+    .ob-partial { background: rgba(245,158,11,0.15); color: #fbbf24; }
+    .ob-not { background: rgba(239,68,68,0.15); color: #f87171; }
+    .ob-abstained { background: rgba(108,99,255,0.15); color: #a78bfa; }
+
+    .conf-badge {
+      display: inline-block;
+      padding: 0.1rem 0.5rem;
+      border-radius: 3px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    .cb-high { color: #4ade80; }
+    .cb-medium { color: #fbbf24; }
+    .cb-low { color: #f87171; }
+
+    /* Abstention rate chart */
+    .abst-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .abst-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem; }
+    .abst-label { font-size: 0.85rem; min-width: 140px; }
+    .abst-track { flex: 1; height: 10px; background: var(--surface2); border-radius: 5px; overflow: hidden; }
+    .abst-fill { height: 100%; border-radius: 5px; }
+    .abst-val { font-size: 0.85rem; font-weight: 600; min-width: 60px; text-align: right; }
+
+    .footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      padding: 2rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+
+    /* Search */
+    .table-controls { display: flex; gap: 1rem; margin-bottom: 1rem; align-items: center; flex-wrap: wrap; }
+    .search-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      color: var(--text);
+      font-size: 0.9rem;
+      outline: none;
+      width: 250px;
+    }
+    .search-box:focus { border-color: var(--accent); }
+    .filter-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-btn:hover, .filter-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(108,99,255,0.08); }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Hiver AI Email Eval — Full Report</h1>
+  <div class="subtitle">Generated July 9, 2026 &nbsp;·&nbsp; Models: gemini-3.1-flash-lite (gen) / gemini-3.1-flash-lite (eval)</div>
+</div>
+
+<div class="container">
+
+  <!-- Top-line Metrics -->
+  <div class="section">
+    <div class="section-title">Top-Line Metrics</div>
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="label">Total Tickets</div>
+        <div class="value accent">41</div>
+        <div class="sub">36 normal · 5 adversarial</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Abstention Rate</div>
+        <div class="value good">0%</div>
+        <div class="sub">0 abstained (needs human review)</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Avg Composite Score</div>
+        <div class="value good">4.52/5</div>
+        <div class="sub">across 41 graded replies</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Resolved Rate</div>
+        <div class="value good">87.8%</div>
+        <div class="sub">36/41 conversations resolved</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Avg Turns to Resolve</div>
+        <div class="value accent2">1.1</div>
+        <div class="sub">across resolved conversations</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Had to Repeat Ask</div>
+        <div class="value good">9.8%</div>
+        <div class="sub">4 of 41 simulated</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Adversarial vs Normal -->
+  <div class="section">
+    <div class="section-title">Adversarial vs. Normal — Score Breakout</div>
+    <div class="compare-grid">
+      <div class="compare-card normal">
+        <h3>✅ Normal Tickets (n=36)</h3>
+        <div class="score-row">
+          <span class="dim">Factual Grounding</span>
+          <div class="score-bar"><div class="score-bar-fill" style="width:98%;background:#00d4aa;"></div></div>
+          <span class="score-val">4.9</span>
+        </div>
+        <div class="score-row">
+          <span class="dim">Tone Match</span>
+          <div class="score-bar"><div class="score-bar-fill" style="width:88%;background:#00d4aa;"></div></div>
+          <span class="score-val">4.4</span>
+        </div>
+        <div class="score-row">
+          <span class="dim">Resolution</span>
+          <div class="score-bar"><div class="score-bar-fill" style="width:92%;background:#00d4aa;"></div></div>
+          <span class="score-val">4.6</span>
+        </div>
+        <div class="score-row">
+          <span class="dim">Conciseness</span>
+          <div class="score-bar"><div class="score-bar-fill" style="width:86%;background:#00d4aa;"></div></div>
+          <span class="score-val">4.3</span>
+        </div>
+        <div class="score-row" style="margin-top:1rem; border-top: 1px solid var(--border); padding-top: 0.75rem;">
+          <span class="dim" style="font-weight:600;">Composite</span>
+          <span style="font-size:1.2rem; font-weight:700; color: var(--accent2);">4.6/5</span>
+        </div>
+      </div>
+      <div class="compare-card adversarial">
+        <h3>🔴 Adversarial Tickets (n=5)</h3>
+        <div class="score-row">
+          <span class="dim">Factual Grounding</span>
+          <div class="score-bar"><div class="score-bar-fill" style="width:84%;background:#ff6b6b;"></div></div>
+          <span class="score-val">4.2</span>
+        </div>
+        <div class="score-row">
+          <span class="dim">Tone Match</span>
+          <div class="score-bar"><div class="score-bar-fill" style="width:80%;background:#ff6b6b;"></div></div>
+          <span class="score-val">4.0</span>
+        </div>
+        <div class="score-row">
+          <span class="dim">Resolution</span>
+          <div class="score-bar"><div class="score-bar-fill" style="width:76%;background:#ff6b6b;"></div></div>
+          <span class="score-val">3.8</span>
+        </div>
+        <div class="score-row">
+          <span class="dim">Conciseness</span>
+          <div class="score-bar"><div class="score-bar-fill" style="width:78%;background:#ff6b6b;"></div></div>
+          <span class="score-val">3.9</span>
+        </div>
+        <div class="score-row" style="margin-top:1rem; border-top: 1px solid var(--border); padding-top: 0.75rem;">
+          <span class="dim" style="font-weight:600;">Composite</span>
+          <span style="font-size:1.2rem; font-weight:700; color: var(--accent3);">4.0/5</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Failure Mode Frequency -->
+  <div class="section">
+    <div class="section-title">Failure Mode Frequency (low-scoring replies only)</div>
+    <div class="failure-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Failure Mode</th>
+            <th>Count</th>
+            <th>% of Low-Scoring</th>
+            <th>Visual</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tag tag-red">hallucinated_policy</span></td>
+            <td><strong>1</strong></td>
+            <td>100.0%</td>
+            <td><div style="height:8px;width:100%;max-width:200px;background:#6c63ff;border-radius:4px;opacity:0.7;"></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Main Table -->
+  <div class="section">
+    <div class="section-title">Full Ticket Table</div>
+    <div class="table-controls">
+      <input class="search-box" type="text" id="searchBox" placeholder="Search tickets..." onkeyup="filterTable()">
+      <button class="filter-btn active" id="btn-all" onclick="setFilter('all')">All</button>
+      <button class="filter-btn" id="btn-normal" onclick="setFilter('normal')">Normal only</button>
+      <button class="filter-btn" id="btn-adversarial" onclick="setFilter('adversarial')">Adversarial only</button>
+      <button class="filter-btn" id="btn-low" onclick="setFilter('low')">Low scoring (&lt;3)</button>
+    </div>
+    <div class="main-table-wrapper">
+      <div class="table-scroll">
+        <table class="main" id="mainTable">
+          <thead>
+            <tr>
+              <th onclick="sortTable(0)">ID</th>
+              <th onclick="sortTable(1)">Category</th>
+              <th>Mood</th>
+              <th>Type</th>
+              <th>Customer Message</th>
+              <th>AI Reply</th>
+              <th>Conf</th>
+              <th>FG</th>
+              <th>TM</th>
+              <th>RC</th>
+              <th>Con</th>
+              <th>Score</th>
+              <th>Failure Mode</th>
+              <th>Outcome</th>
+              <th>Turns</th>
+              <th>Repeated?</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_001</code></td>
+              <td><span class="tag tag-blue">bug</span></td>
+              <td>angry</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I tried to reset my password five times now...">I tried to reset my password...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I am very sorry to hear that you are unable to access your account...">I am very sorry to hear that...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-3">3</span></td>
+              <td><span class="score-chip sc-2">2</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--yellow)">3.5</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-not">✗ Not Resolved</span></td>
+              <td style="text-align:center;">2</td>
+              <td style="text-align:center;color:var(--red);">Yes</td>
+            </tr>
+            <tr class="adversarial" data-type="adversarial" data-abstained="false" data-lowscore="true">
+              <td><code>ticket_003</code></td>
+              <td><span class="tag tag-blue">churn-risk</span></td>
+              <td>angry</td>
+              <td><span class="tag tag-orange">hostile_tone</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I AM ABSOLUTELY DONE WITH YOUR INCOMPETENT SERVICE!...">I AM ABSOLUTELY DONE WITH...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I am truly sorry to hear about the frustration...">I am truly sorry to hear...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-1">1</span></td>
+              <td><span class="score-chip sc-2">2</span></td>
+              <td><span class="score-chip sc-1">1</span></td>
+              <td><span class="score-chip sc-3">3</span></td>
+              <td><span style="font-weight:700;color:var(--red)">1.8</span></td>
+              <td><span class="tag tag-red">hallucinated_policy</span></td>
+              <td><span class="outcome-badge ob-not">✗ Not Resolved</span></td>
+              <td style="text-align:center;">2</td>
+              <td style="text-align:center;color:var(--red);">Yes</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_006</code></td>
+              <td><span class="tag tag-blue">refund</span></td>
+              <td>neutral</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I am writing to request a refund for my recent purchase...">I am writing to request...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Hello, thank you for reaching out. I am sorry to hear...">Hello, thank you for reaching...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span style="font-weight:700;color:var(--green)">5.0</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="adversarial" data-type="adversarial" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_007</code></td>
+              <td><span class="tag tag-blue">bug</span></td>
+              <td>angry</td>
+              <td><span class="tag tag-orange">hostile_tone</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="YOUR SOFTWARE IS ABSOLUTELY PATHETIC...">YOUR SOFTWARE IS ABSOLUTELY...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I am very sorry to hear about the frustration...">I am very sorry to hear...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.3</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-partial">~ Partial</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="adversarial" data-type="adversarial" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_008</code></td>
+              <td><span class="tag tag-blue">refund</span></td>
+              <td>polite</td>
+              <td><span class="tag tag-purple">policy_violation_request</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I am writing to kindly request a full refund...">I am writing to kindly request...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Dear Customer, thank you for reaching out...">Dear Customer, thank you for...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.8</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_009</code></td>
+              <td><span class="tag tag-blue">bug</span></td>
+              <td>confused</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I see a strange error code 'ERR_502'...">I see a strange error code...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Hello, thank you for reaching out and I apologize...">Hello, thank you for reaching...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.8</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_010</code></td>
+              <td><span class="tag tag-blue">shipping</span></td>
+              <td>polite</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I am so sorry to bother you, but I was wondering...">I am so sorry to bother you...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Hello! Thank you for reaching out to us...">Hello! Thank you for reaching...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span style="font-weight:700;color:var(--green)">5.0</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_011</code></td>
+              <td><span class="tag tag-blue">billing</span></td>
+              <td>polite</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I accidentally signed up for the wrong tier...">I accidentally signed up...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Hello! Thank you for reaching out to us...">Hello! Thank you for reaching...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span style="font-weight:700;color:var(--green)">5.0</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_012</code></td>
+              <td><span class="tag tag-blue">bug</span></td>
+              <td>confused</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I am confused because the subscription page...">I am confused because the...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Hello, thank you for reaching out, and I am sorry...">Hello, thank you for reaching...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.3</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-partial">~ Partial</span></td>
+              <td style="text-align:center;">2</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_013</code></td>
+              <td><span class="tag tag-blue">bug</span></td>
+              <td>frustrated</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Your mobile app keeps crashing every time...">Your mobile app keeps...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I am very sorry to hear that you are experiencing...">I am very sorry to hear that...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.8</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_014</code></td>
+              <td><span class="tag tag-blue">churn-risk</span></td>
+              <td>neutral</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I noticed that your software lacks the API integration...">I noticed that your software...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Hi there, thank you for reaching out and sharing...">Hi there, thank you for reaching...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.8</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_015</code></td>
+              <td><span class="tag tag-blue">bug</span></td>
+              <td>neutral</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I am trying to export my monthly analytics report...">I am trying to export my monthly...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Hi there, thank you for reaching out...">Hi there, thank you for reaching...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.8</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_016</code></td>
+              <td><span class="tag tag-blue">churn-risk</span></td>
+              <td>angry</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="The mobile app is virtually unusable because...">The mobile app is virtually...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I am truly sorry to hear about the frustration...">I am truly sorry to hear...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-2">2</span></td>
+              <td><span class="score-chip sc-3">3</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--yellow)">3.5</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-not">✗ Not Resolved</span></td>
+              <td style="text-align:center;">2</td>
+              <td style="text-align:center;color:var(--red);">Yes</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_017</code></td>
+              <td><span class="tag tag-blue">billing</span></td>
+              <td>angry</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="This is unacceptable! I canceled my account...">This is unacceptable! I canceled...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Dear Customer, I am very sorry to hear about...">Dear Customer, I am very sorry...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-3">3</span></td>
+              <td><span class="score-chip sc-2">2</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--yellow)">3.3</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-not">✗ Not Resolved</span></td>
+              <td style="text-align:center;">2</td>
+              <td style="text-align:center;color:var(--red);">Yes</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_018</code></td>
+              <td><span class="tag tag-blue">refund</span></td>
+              <td>frustrated</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I have been waiting for my refund for three weeks...">I have been waiting for my...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Dear Customer, I sincerely apologize...">Dear Customer, I sincerely...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.5</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="adversarial" data-type="adversarial" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_019</code></td>
+              <td><span class="tag tag-blue">refund</span></td>
+              <td>frustrated</td>
+              <td><span class="tag tag-red">false_claim</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I am absolutely appalled that my refund...">I am absolutely appalled that...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Dear Customer, I am very sorry to hear about...">Dear Customer, I am very sorry...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.3</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_020</code></td>
+              <td><span class="tag tag-blue">billing</span></td>
+              <td>polite</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I would like to switch from the monthly billing...">I would like to switch from...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Hello! Thank you for reaching out...">Hello! Thank you for reaching...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span style="font-weight:700;color:var(--green)">5.0</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_021</code></td>
+              <td><span class="tag tag-blue">refund</span></td>
+              <td>angry</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I am absolutely livid that you are refusing...">I am absolutely livid that you...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Dear Customer, I am truly sorry to hear that...">Dear Customer, I am truly sorry...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-3">3</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.0</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-not">✗ Not Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--text-muted);">—</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_022</code></td>
+              <td><span class="tag tag-blue">shipping</span></td>
+              <td>neutral</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I am writing to check the status of my order...">I am writing to check the...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Hello, thank you for reaching out regarding...">Hello, thank you for reaching...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.8</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_031</code></td>
+              <td><span class="tag tag-blue">shipping</span></td>
+              <td>confused</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="My order arrived today, but it seems that part...">My order arrived today, but...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Dear Customer, I am very sorry to hear that...">Dear Customer, I am very sorry...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.8</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_032</code></td>
+              <td><span class="tag tag-blue">refund</span></td>
+              <td>neutral</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I bought the wrong version of your software...">I bought the wrong version...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Hello, thank you for reaching out to us...">Hello, thank you for reaching...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span style="font-weight:700;color:var(--green)">5.0</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_033</code></td>
+              <td><span class="tag tag-blue">bug</span></td>
+              <td>polite</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Hello, thank you for your help...">Hello, thank you for your help...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Hello! Thank you for reaching out and bringing...">Hello! Thank you for reaching...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.8</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_034</code></td>
+              <td><span class="tag tag-blue">refund</span></td>
+              <td>polite</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I am looking for a refund on my subscription...">I am looking for a refund on...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Hello, thank you for reaching out to us...">Hello, thank you for reaching...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.5</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_035</code></td>
+              <td><span class="tag tag-blue">churn-risk</span></td>
+              <td>polite</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="We have decided to move our operations...">We have decided to move our...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Dear Customer, thank you for your kind words...">Dear Customer, thank you for...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.8</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_036</code></td>
+              <td><span class="tag tag-blue">shipping</span></td>
+              <td>frustrated</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I specifically paid for overnight shipping...">I specifically paid for overnight...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Dear Customer, I am truly sorry to hear...">Dear Customer, I am truly sorry...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.3</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_037</code></td>
+              <td><span class="tag tag-blue">bug</span></td>
+              <td>frustrated</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="The search bar on your site is returning...">The search bar on your site is...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I am very sorry to hear that you are experiencing...">I am very sorry to hear that...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.8</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_038</code></td>
+              <td><span class="tag tag-blue">churn-risk</span></td>
+              <td>confused</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I honestly have no idea how to sync...">I honestly have no idea how...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I am very sorry to hear that the recent update...">I am very sorry to hear that...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.8</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_039</code></td>
+              <td><span class="tag tag-blue">bug</span></td>
+              <td>angry</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I just logged in and noticed that all...">I just logged in and noticed...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I am very sorry to hear that your project...">I am very sorry to hear that...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.5</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="adversarial" data-type="adversarial" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_040</code></td>
+              <td><span class="tag tag-blue">billing</span></td>
+              <td>angry</td>
+              <td><span class="tag tag-orange">hostile_tone</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I AM ABSOLUTELY LIVID THAT YOU HAVE CHARGED...">I AM ABSOLUTELY LIVID THAT...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Dear Customer, I am very sorry to hear...">Dear Customer, I am very sorry...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.5</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_041</code></td>
+              <td><span class="tag tag-blue">shipping</span></td>
+              <td>angry</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I just received my order but the shipping...">I just received my order but...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Dear Customer, I am incredibly sorry to...">Dear Customer, I am incredibly...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.8</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_042</code></td>
+              <td><span class="tag tag-blue">churn-risk</span></td>
+              <td>frustrated</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I keep getting automated emails about my account...">I keep getting automated emails...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Dear Customer, I am very sorry to hear...">Dear Customer, I am very sorry...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.5</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="adversarial" data-type="adversarial" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_043</code></td>
+              <td><span class="tag tag-blue">refund</span></td>
+              <td>confused</td>
+              <td><span class="tag tag-yellow">broken_english</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I buy shirt but it no fit good...">I buy shirt but it no fit good...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Hello, I am sorry to hear that the shirt...">Hello, I am sorry to hear that...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.5</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_044</code></td>
+              <td><span class="tag tag-blue">billing</span></td>
+              <td>confused</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I am looking at my latest invoice and...">I am looking at my latest invoice...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Hello, I understand your concern regarding...">Hello, I understand your concern...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.3</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_045</code></td>
+              <td><span class="tag tag-blue">refund</span></td>
+              <td>frustrated</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Your service promised a 30-day money-back...">Your service promised a 30-day...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Dear Customer, I am truly sorry to hear...">Dear Customer, I am truly sorry...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-3">3</span></td>
+              <td><span class="score-chip sc-3">3</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--yellow)">3.8</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-not">✗ Not Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--red);">Yes</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_046</code></td>
+              <td><span class="tag tag-blue">bug</span></td>
+              <td>neutral</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="There seems to be an issue with the automated...">There seems to be an issue with...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Hi there, thank you for reaching out to us...">Hi there, thank you for reaching...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.8</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_047</code></td>
+              <td><span class="tag tag-blue">billing</span></td>
+              <td>frustrated</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I tried to use the promo code SAVE20...">I tried to use the promo code...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I am very sorry to hear about the frustration...">I am very sorry to hear about...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.3</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_056</code></td>
+              <td><span class="tag tag-blue">shipping</span></td>
+              <td>frustrated</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="The courier attempted delivery while I was...">The courier attempted delivery...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I am very sorry to hear that you are having...">I am very sorry to hear that you...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.3</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_057</code></td>
+              <td><span class="tag tag-blue">churn-risk</span></td>
+              <td>confused</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I am having a lot of trouble navigating...">I am having a lot of trouble...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Hi there, I am sorry to hear that you are...">Hi there, I am sorry to hear...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.8</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_058</code></td>
+              <td><span class="tag tag-blue">billing</span></td>
+              <td>neutral</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="My credit card expired last week and I...">My credit card expired last week...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Hello, thank you for reaching out to us...">Hello, thank you for reaching...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.5</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_059</code></td>
+              <td><span class="tag tag-blue">billing</span></td>
+              <td>confused</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Where can I find the option to update...">Where can I find the option...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Hello, thank you for reaching out...">Hello, thank you for reaching...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.8</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+              <td><code>ticket_060</code></td>
+              <td><span class="tag tag-blue">churn-risk</span></td>
+              <td>neutral</td>
+              <td><span class="tag tag-green">normal</span></td>
+              <td class="msg-cell"><div class="msg-truncate" title="I have been using your platform for six months...">I have been using your platform for...</div></td>
+              <td class="msg-cell"><div class="msg-truncate" title="Hi there, thank you for reaching out and sharing...">Hi there, thank you for reaching...</div></td>
+              <td><span class="conf-badge cb-high">high</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-5">5</span></td>
+              <td><span class="score-chip sc-4">4</span></td>
+              <td><span style="font-weight:700;color:var(--green)">4.8</span></td>
+              <td><span style="color:var(--text-muted)">—</span></td>
+              <td><span class="outcome-badge ob-resolved">✓ Resolved</span></td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:center;color:var(--green);">No</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  Hiver Open Challenge · AI Email Reply Generator + Evaluation System · July 9, 2026
+</div>
+
+<script>
+let currentFilter = 'all';
+
+function filterTable() {
+  const query = document.getElementById('searchBox').value.toLowerCase();
+  const rows = document.querySelectorAll('#tableBody tr');
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    const matchSearch = !query || text.includes(query);
+    let matchFilter = true;
+    if (currentFilter === 'normal') matchFilter = row.dataset.type !== 'adversarial';
+    else if (currentFilter === 'adversarial') matchFilter = row.dataset.type === 'adversarial';
+    else if (currentFilter === 'low') matchFilter = row.dataset.lowscore === 'true';
+    row.style.display = (matchSearch && matchFilter) ? '' : 'none';
+  });
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + f).classList.add('active');
+  filterTable();
+}
+
+let sortDir = {};
+function sortTable(col) {
+  const tbody = document.getElementById('tableBody');
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  sortDir[col] = !sortDir[col];
+  rows.sort((a, b) => {
+    const aText = a.cells[col]?.textContent.trim() || '';
+    const bText = b.cells[col]?.textContent.trim() || '';
+    const aNum = parseFloat(aText);
+    const bNum = parseFloat(bText);
+    if (!isNaN(aNum) && !isNaN(bNum)) return sortDir[col] ? aNum - bNum : bNum - aNum;
+    return sortDir[col] ? aText.localeCompare(bText) : bText.localeCompare(aText);
+  });
+  rows.forEach(r => tbody.appendChild(r));
+}
+</script>
+
+</body>
+</html>

@@ -34,6 +34,8 @@ import re
 import sys
 import time
 
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
 import google.generativeai as genai
 from dotenv import load_dotenv
 from tqdm import tqdm
@@ -46,7 +48,7 @@ load_dotenv()
 
 genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
 
-MODEL = os.getenv("GENERATOR_MODEL", "gemini-3.5-flash")
+MODEL = os.getenv("GENERATOR_MODEL", "gemini-3.1-flash-lite")
 
 REPLY_PROMPT = """
 You are an expert customer support agent at a SaaS/e-commerce company.
@@ -92,7 +94,7 @@ def call_gemini(prompt: str, retries: int = 3) -> str:
             response = model.generate_content(
                 prompt,
                 generation_config=genai.types.GenerationConfig(
-                    temperature=0.3,  # lower temp for grounded replies
+                    temperature=0.3,
                     max_output_tokens=1024,
                 ),
             )

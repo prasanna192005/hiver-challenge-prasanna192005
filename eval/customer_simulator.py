@@ -37,6 +37,8 @@ import re
 import sys
 import time
 
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
 import google.generativeai as genai
 from dotenv import load_dotenv
 from tqdm import tqdm
@@ -45,7 +47,7 @@ load_dotenv()
 
 genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
 
-MODEL = os.getenv("SIMULATOR_MODEL", "gemini-3.5-flash")
+MODEL = os.getenv("SIMULATOR_MODEL", "gemini-3.1-flash-lite")
 MAX_TURNS = 3
 
 CUSTOMER_SYSTEM_PROMPT = """
@@ -93,19 +95,17 @@ def call_gemini_chat(
     system_prompt: str | None = None,
     retries: int = 3,
 ) -> str:
-    """Call Gemini with a list of {role, parts} messages."""
+    """Call Gemini with multi-turn chat history."""
     model = genai.GenerativeModel(
         MODEL,
         system_instruction=system_prompt,
     )
-    # Convert to Gemini format
     history = []
     for msg in messages[:-1]:
         history.append(
             {"role": msg["role"], "parts": [{"text": msg["content"]}]}
         )
     last = messages[-1]
-
     chat = model.start_chat(history=history)
     for attempt in range(retries):
         try:

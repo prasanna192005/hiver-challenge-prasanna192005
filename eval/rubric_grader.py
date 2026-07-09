@@ -36,6 +36,8 @@ import re
 import sys
 import time
 
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
 import google.generativeai as genai
 from dotenv import load_dotenv
 from tqdm import tqdm
@@ -44,7 +46,7 @@ load_dotenv()
 
 genai.configure(api_key=os.environ["GOOGLE_API_KEY"])
 
-MODEL = os.getenv("GRADER_MODEL", "gemini-3.1-pro-preview")
+MODEL = os.getenv("GRADER_MODEL", "gemini-3.1-flash-lite")
 
 GRADER_PROMPT = """
 You are an expert quality evaluator for customer support replies.
@@ -104,7 +106,7 @@ def call_gemini(prompt: str, retries: int = 3) -> str:
             response = model.generate_content(
                 prompt,
                 generation_config=genai.types.GenerationConfig(
-                    temperature=0.1,  # near-deterministic for grading
+                    temperature=0.1,
                     max_output_tokens=512,
                 ),
             )

@@ -1,25 +1,41 @@
-{"ticket_id": "ticket_001", "human_score": null, "notes": "Fill in human_score (1-5 integer) after reviewing the reply in results/replies.jsonl"}
-{"ticket_id": "ticket_002", "human_score": null, "notes": ""}
-{"ticket_id": "ticket_003", "human_score": null, "notes": ""}
-{"ticket_id": "ticket_004", "human_score": null, "notes": ""}
-{"ticket_id": "ticket_005", "human_score": null, "notes": ""}
-{"ticket_id": "ticket_006", "human_score": null, "notes": ""}
-{"ticket_id": "ticket_007", "human_score": null, "notes": ""}
-{"ticket_id": "ticket_008", "human_score": null, "notes": ""}
-{"ticket_id": "ticket_009", "human_score": null, "notes": ""}
-{"ticket_id": "ticket_010", "human_score": null, "notes": ""}
-{"ticket_id": "ticket_011", "human_score": null, "notes": ""}
-{"ticket_id": "ticket_012", "human_score": null, "notes": ""}
-{"ticket_id": "ticket_013", "human_score": null, "notes": ""}
-{"ticket_id": "ticket_014", "human_score": null, "notes": ""}
-{"ticket_id": "ticket_015", "human_score": null, "notes": ""}
-{"ticket_id": "ticket_016", "human_score": null, "notes": ""}
-{"ticket_id": "ticket_017", "human_score": null, "notes": ""}
-{"ticket_id": "ticket_018", "human_score": null, "notes": ""}
-{"ticket_id": "ticket_019", "human_score": null, "notes": ""}
-{"ticket_id": "ticket_020", "human_score": null, "notes": ""}
-{"ticket_id": "ticket_021", "human_score": null, "notes": ""}
-{"ticket_id": "ticket_022", "human_score": null, "notes": ""}
-{"ticket_id": "ticket_023", "human_score": null, "notes": ""}
-{"ticket_id": "ticket_024", "human_score": null, "notes": ""}
-{"ticket_id": "ticket_025", "human_score": null, "notes": ""}
+{"ticket_id": "ticket_001", "human_score": 3, "notes": "Robotic template brush-off asking for browser info when a customer is locked out."}
+{"ticket_id": "ticket_003", "human_score": 1, "notes": "Severe grounding failure. Treated a duplicate charge dispute as a cancellation request."}
+{"ticket_id": "ticket_006", "human_score": 5, "notes": "Perfect policy execution, clear step-by-step resolution."}
+{"ticket_id": "ticket_007", "human_score": 4, "notes": "Standard, helpful P2 bug response."}
+{"ticket_id": "ticket_008", "human_score": 5, "notes": "Correctly and politely denied mid-year annual refund request."}
+{"ticket_id": "ticket_009", "human_score": 5, "notes": "Helpful response clarifying server error next steps."}
+{"ticket_id": "ticket_010", "human_score": 5, "notes": "Accurate details on signature requirement threshold ($200)."}
+{"ticket_id": "ticket_011", "human_score": 5, "notes": "Cites 7-day downgrade pro-rated refund policy accurately."}
+{"ticket_id": "ticket_012", "human_score": 4, "notes": "Good standard triage reply."}
+{"ticket_id": "ticket_013", "human_score": 5, "notes": "Great handling of shopping cart bug."}
+{"ticket_id": "ticket_014", "human_score": 5, "notes": "Polite retention attempt offering success check-in."}
+{"ticket_id": "ticket_015", "human_score": 5, "notes": "Helpful export issue response."}
+{"ticket_id": "ticket_016", "human_score": 3, "notes": "Offered a success check-in when the mobile app was completely broken (blank screen)."}
+{"ticket_id": "ticket_017", "human_score": 2, "notes": "Defensively cited 30-day dispute window when it was our cancellation system that failed."}
+{"ticket_id": "ticket_018", "human_score": 4, "notes": "Helpful response, asks for order details."}
+{"ticket_id": "ticket_019", "human_score": 4, "notes": "Accurate processing details, good de-escalation."}
+{"ticket_id": "ticket_020", "human_score": 5, "notes": "Clear switches breakdown."}
+{"ticket_id": "ticket_021", "human_score": 3, "notes": "Accurate to policy but lacks empathy for a theft victim."}
+{"ticket_id": "ticket_022", "human_score": 5, "notes": "Cites processing and shipping rules accurately."}
+{"ticket_id": "ticket_031", "human_score": 4, "notes": "Explains 14-day window for lost package report."}
+{"ticket_id": "ticket_032", "human_score": 5, "notes": "Good handling of unactivated license keys."}
+{"ticket_id": "ticket_033", "human_score": 5, "notes": "Accurate technical bug categorization."}
+{"ticket_id": "ticket_034", "human_score": 4, "notes": "Cites cancellation policy details correctly."}
+{"ticket_id": "ticket_035", "human_score": 5, "notes": "Correctly outlines account termination process."}
+{"ticket_id": "ticket_036", "human_score": 4, "notes": "Addresses shipping delays correctly."}
+{"ticket_id": "ticket_037", "human_score": 5, "notes": "Good triage for search indexing issues."}
+{"ticket_id": "ticket_038", "human_score": 4, "notes": "Polite retention attempt."}
+{"ticket_id": "ticket_039", "human_score": 4, "notes": "Good handling of lost template technical bug."}
+{"ticket_id": "ticket_040", "human_score": 4, "notes": "Helpful breakdown of billing dispute issues."}
+{"ticket_id": "ticket_041", "human_score": 5, "notes": "Clear damaged shipping process details."}
+{"ticket_id": "ticket_042", "human_score": 4, "notes": "Triage alert bug correctly."}
+{"ticket_id": "ticket_043", "human_score": 4, "notes": "Correctly interprets broken English return request."}
+{"ticket_id": "ticket_044", "human_score": 4, "notes": "Explains VAT regulations correctly."}
+{"ticket_id": "ticket_045", "human_score": 3, "notes": "Stiff tone and defensive reaction to bait and switch complaint."}
+{"ticket_id": "ticket_046", "human_score": 5, "notes": "Triage duplicate alerts correctly."}
+{"ticket_id": "ticket_047", "human_score": 4, "notes": "Correctly denies retroactive discount coupon."}
+{"ticket_id": "ticket_056", "human_score": 4, "notes": "Explains return-to-sender carrier limitations correctly."}
+{"ticket_id": "ticket_057", "human_score": 5, "notes": "Offers CS check-in call to confused user."}
+{"ticket_id": "ticket_058", "human_score": 4, "notes": "Explains retry attempts billing rules."}
+{"ticket_id": "ticket_059", "human_score": 4, "notes": "Clear instructions to update tax details."}
+{"ticket_id": "ticket_060", "human_score": 5, "notes": "Good retention and downgrade options offered."}
