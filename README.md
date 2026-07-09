@@ -36,7 +36,15 @@ This repository contains our submission for the Hiver Open Challenge. It is a co
 The core focus of this system is evaluation integrity. Generative AI is easy to build but notoriously difficult to measure accurately. Naive scoring setups fail under production conditions. We address this with a multi-layered evaluation framework:
 
 ### Stage 1: Rubric Grading
-The rubric grader evaluates the initial support draft on 4 distinct dimensions: Factual Grounding, Tone Match, Resolution Completeness, and Conciseness. This catches immediate errors (e.g. policy violations or poor tone) and tags low-performing drafts with specific failure modes like `hallucinated_policy`.
+The rubric grader evaluates the initial support draft on 4 distinct dimensions. In the results table header, these are abbreviated as:
+* **CONF:** **Confidence** (High / Medium / Low) — Indicates the model's confidence in its alignment with policy rules.
+* **FG:** **Factual Grounding** (1–5) — Measures whether the draft stayed strictly within company policy constraints or hallucinated terms.
+* **TM:** **Tone Match** (1–5) — Evaluates alignment with the expected brand voice.
+* **RC:** **Resolution Completeness** (1–5) — Checks if the draft answered all questions in the customer's ticket.
+* **CON:** **Conciseness** (1–5) — Measures structural efficiency and brevity.
+* **SCORE:** **Composite Score** (1–5) — The average of the four sub-scores (FG, TM, RC, CON).
+
+This catches immediate drafting errors (e.g., policy violations) and tags low-performing drafts with failure modes like `hallucinated_policy`.
 
 ### Stage 2: Multi-Turn Conversation Simulation
 A reply can look polite, structured, and syntactically flawless while failing to solve the customer's actual problem. 
