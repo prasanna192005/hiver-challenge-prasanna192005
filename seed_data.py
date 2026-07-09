@@ -1,5 +1,5 @@
 """
-seed_data.py — Pre-generates all dataset and result files without API calls.
+seed_data.py — Pre-generates all dataset and result files without API calls. if you dont want to configure the API keys or run the simulation, you can use this script to generate the data files.
 
 Run:
     .\\myenv\\Scripts\\python.exe seed_data.py

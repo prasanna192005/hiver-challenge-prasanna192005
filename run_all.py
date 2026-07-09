@@ -230,23 +230,27 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }}
     table.main th:hover {{ color: var(--accent2); }}
     table.main td {{
-      padding: 0.7rem 1rem;
+      padding: 1rem;
       border-bottom: 1px solid var(--border);
       vertical-align: top;
-      max-width: 320px;
+      max-width: none;
+      word-break: break-word;
     }}
     table.main tr:last-child td {{ border-bottom: none; }}
-    table.main tr:hover td {{ background: rgba(108,99,255,0.04); }}
+    table.main tr:hover td {{ background: var(--surface-hover); }}
     table.main tr.adversarial td {{ border-left: 3px solid var(--accent3); }}
     table.main tr.abstained td {{ opacity: 0.6; }}
-    .msg-cell {{ max-width: 300px; }}
-    .msg-truncate {{
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      color: var(--text-muted);
-      cursor: help;
+    .msg-cell {{ min-width: 250px; font-size: 0.8rem; }}
+    .msg-text {{
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.75rem;
+      color: var(--text);
+      max-height: 250px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      font-family: inherit;
     }}
     .score-chip {{
       display: inline-block;
@@ -330,8 +334,134 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       font-size: 0.85rem;
       cursor: pointer;
       transition: all 0.2s;
-    }}
-    .filter-btn:hover, .filter-btn.active {{ border-color: var(--accent); color: var(--accent); background: rgba(108,99,255,0.08); }}
+    }
+    .filter-btn:hover, .filter-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(108,99,255,0.08); }
+
+    /* Modal Backdrop */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    /* Modal Container */
+    .modal-content {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      width: 95%;
+      max-width: 1100px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: fadeIn 0.15s ease-out;
+    }
+    @keyframes fadeIn {
+      from { transform: scale(0.97); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .modal-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    .modal-close:hover { color: var(--text); }
+    .modal-body {
+      padding: 1.5rem;
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 900px) {
+      .modal-body { grid-template-columns: 1fr; }
+    }
+    .modal-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .modal-section h3 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.25rem;
+    }
+    .modal-text-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+      color: var(--text);
+      line-height: 1.6;
+      max-height: 380px;
+      overflow-y: auto;
+    }
+    /* Simulated Conversation Chat Logs */
+    .convo-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding: 0.5rem;
+      max-height: 380px;
+      overflow-y: auto;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+    .chat-bubble {
+      max-width: 85%;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+    .bubble-customer {
+      background: var(--surface-active);
+      color: var(--text);
+      align-self: flex-start;
+      border-bottom-left-radius: 2px;
+    }
+    .bubble-support {
+      background: var(--accent-muted);
+      border: 1px solid var(--accent);
+      color: var(--text);
+      align-self: flex-end;
+      border-bottom-right-radius: 2px;
+    }
+    .bubble-role {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+      color: var(--text-muted);
+    }
   </style>
 </head>
 <body>
@@ -475,6 +605,32 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
 </div>
 
+<!-- Modal Dialog -->
+<div class="modal-backdrop" id="emailModal" onclick="closeModalOnBackdrop(event)">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="modalTitle">Ticket Details</h2>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex; flex-direction:column; gap:1.25rem;">
+        <div class="modal-section">
+          <h3>First Customer Message</h3>
+          <div class="modal-text-box" id="modalCustomerMsg"></div>
+        </div>
+        <div class="modal-section">
+          <h3>First AI Generated Draft</h3>
+          <div class="modal-text-box" id="modalAiReply"></div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <h3>Simulated Multi-Turn Conversation Log</h3>
+        <div class="convo-container" id="modalChatHistory"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="footer">
   Hiver Open Challenge · AI Email Reply Generator + Evaluation System · {timestamp}
 </div>
@@ -482,10 +638,10 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 <script>
 let currentFilter = 'all';
 
-function filterTable() {{
+function filterTable() {
   const query = document.getElementById('searchBox').value.toLowerCase();
   const rows = document.querySelectorAll('#tableBody tr');
-  rows.forEach(row => {{
+  rows.forEach(row => {
     const text = row.textContent.toLowerCase();
     const matchSearch = !query || text.includes(query);
     let matchFilter = true;
@@ -494,31 +650,85 @@ function filterTable() {{
     else if (currentFilter === 'abstained') matchFilter = row.dataset.abstained === 'true';
     else if (currentFilter === 'low') matchFilter = row.dataset.lowscore === 'true';
     row.style.display = (matchSearch && matchFilter) ? '' : 'none';
-  }});
-}}
+  });
+}
 
-function setFilter(f) {{
+function setFilter(f) {
   currentFilter = f;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('btn-' + f).classList.add('active');
   filterTable();
-}}
+}
 
-let sortDir = {{}};
-function sortTable(col) {{
+let sortDir = {};
+function sortTable(col) {
   const tbody = document.getElementById('tableBody');
   const rows = Array.from(tbody.querySelectorAll('tr'));
   sortDir[col] = !sortDir[col];
-  rows.sort((a, b) => {{
+  rows.sort((a, b) => {
     const aText = a.cells[col]?.textContent.trim() || '';
     const bText = b.cells[col]?.textContent.trim() || '';
     const aNum = parseFloat(aText);
     const bNum = parseFloat(bText);
     if (!isNaN(aNum) && !isNaN(bNum)) return sortDir[col] ? aNum - bNum : bNum - aNum;
     return sortDir[col] ? aText.localeCompare(bText) : bText.localeCompare(aText);
-  }});
+  });
   rows.forEach(r => tbody.appendChild(r));
-}}
+}
+
+// Modal Functions
+function showModal(ticketId, metaInfo, customerMsg, aiReply, convoJsonStr) {
+  document.getElementById('modalTitle').textContent = `Ticket ${ticketId} [${metaInfo}]`;
+  document.getElementById('modalCustomerMsg').textContent = customerMsg;
+  document.getElementById('modalAiReply').textContent = aiReply;
+  
+  const chatContainer = document.getElementById('modalChatHistory');
+  chatContainer.innerHTML = '';
+  
+  try {
+    const convo = JSON.parse(convoJsonStr || '[]');
+    if (convo.length === 0) {
+      chatContainer.innerHTML = '<div style="color:var(--text-muted);font-size:0.8rem;padding:1rem;text-align:center;">No simulated turns generated for this ticket (abstained or single-turn).</div>';
+    } else {
+      convo.forEach(turn => {
+        const isSupport = turn.role === 'support' || turn.role === 'agent';
+        const bubble = document.createElement('div');
+        bubble.className = 'chat-bubble ' + (isSupport ? 'bubble-support' : 'bubble-customer');
+        
+        const roleDiv = document.createElement('div');
+        roleDiv.className = 'bubble-role';
+        roleDiv.textContent = isSupport ? 'AI Support Agent' : 'Simulated Customer';
+        
+        const textDiv = document.createElement('div');
+        textDiv.textContent = turn.text || turn.content || '';
+        
+        bubble.appendChild(roleDiv);
+        bubble.appendChild(textDiv);
+        chatContainer.appendChild(bubble);
+      });
+    }
+  } catch (e) {
+    chatContainer.innerHTML = '<div style="color:var(--red);font-size:0.8rem;padding:1rem;">Failed to parse simulated conversation log.</div>';
+  }
+  
+  document.getElementById('emailModal').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('emailModal').style.display = 'none';
+}
+
+function closeModalOnBackdrop(event) {
+  if (event.target === document.getElementById('emailModal')) {
+    closeModal();
+  }
+}
+
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape') {
+    closeModal();
+  }
+});
 </script>
 
 </body>
@@ -736,6 +946,14 @@ def build_html_report(
         had_repeat = sim_rec.get("had_to_repeat_ask")
         repeat_str = ("Yes" if had_repeat else "No") if had_repeat is not None and not is_abstained else "—"
 
+        meta_info = f"{reply.get('category','').title()} — {reply.get('mood','').title()}"
+        meta_info_esc = meta_info.replace("'", "\\'")
+        msg_esc = full_msg.replace("'", "\\'")
+        reply_esc = full_reply.replace("'", "\\'")
+
+        convo_list = sim_rec.get("conversation", [])
+        convo_json_esc = json.dumps(convo_list).replace("'", "\\'").replace('"', '&quot;')
+
         table_rows_html += f"""
         <tr class="{row_class}" 
             data-type="{'adversarial' if is_adv else 'normal'}"
@@ -745,8 +963,18 @@ def build_html_report(
           <td><span class="tag tag-blue">{reply.get('category','')}</span></td>
           <td style="font-size:0.8rem;color:var(--text-muted);">{reply.get('mood','')}</td>
           <td>{adv_type_tag(reply.get('adversarial_type'), is_adv)}</td>
-          <td class="msg-cell"><div class="msg-truncate" title="{full_msg}">{msg_truncated}{'...' if len(full_msg)>120 else ''}</div></td>
-          <td class="msg-cell"><div class="msg-truncate" title="{full_reply}">{reply_truncated}{'...' if len(full_reply)>120 else ''}</div></td>
+          <td>
+            <div class="msg-cell-content">
+              <span class="msg-text-truncated">{full_msg[:50]}...</span>
+              <button class="btn-read-more" onclick="showModal('{tid}', '{meta_info_esc}', '{msg_esc}', '{reply_esc}', '{convo_json_esc}')">Read</button>
+            </div>
+          </td>
+          <td>
+            <div class="msg-cell-content">
+              <span class="msg-text-truncated">{full_reply[:50]}...</span>
+              <button class="btn-read-more" onclick="showModal('{tid}', '{meta_info_esc}', '{msg_esc}', '{reply_esc}', '{convo_json_esc}')">Read</button>
+            </div>
+          </td>
           <td>{conf_badge(reply.get('confidence'))}</td>
           <td>{score_chip(fg)}</td>
           <td>{score_chip(tm)}</td>
@@ -809,6 +1037,17 @@ def main():
     print("\n" + "="*60)
     print("  Hiver AI Email Eval — Full Pipeline")
     print("="*60)
+
+    api_key = os.getenv("GOOGLE_API_KEY")
+    if not api_key or api_key.strip() in ("", "YOUR_GOOGLE_API_KEY", "PLACEHOLDER_KEY", "PLACEHOLDER"):
+        print("\n[INFO] GOOGLE_API_KEY is not configured in .env.")
+        print("  → Running in mock/offline mode (generating report from seed_data.py)...")
+        import importlib.util
+        seed_spec = importlib.util.spec_from_file_location("seed_data", os.path.join(BASE_DIR, "seed_data.py"))
+        seed_module = importlib.util.module_from_spec(seed_spec)
+        seed_spec.loader.exec_module(seed_module)
+        seed_module.main()
+        sys.exit(0)
 
     if not args.report_only:
 

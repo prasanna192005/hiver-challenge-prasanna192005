@@ -3,46 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hiver AI Email Eval — Report</title>
+  <title>Hiver AI Email Eval — Pipeline Dashboard</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+    
     :root {
-      --bg: #0f1117;
-      --surface: #1a1d27;
-      --surface2: #22263a;
-      --border: #2e3354;
-      --accent: #6c63ff;
-      --accent2: #00d4aa;
-      --accent3: #ff6b6b;
-      --text: #e4e6f0;
-      --text-muted: #8b93b5;
-      --green: #22c55e;
+      --bg: #09090b;
+      --surface: #18181b;
+      --surface-hover: #202024;
+      --surface-active: #27272a;
+      --border: #27272a;
+      --accent: #6366f1;
+      --accent-muted: rgba(99, 102, 241, 0.1);
+      --accent2: #10b981;
+      --accent3: #f43f5e;
+      --text: #fafafa;
+      --text-muted: #a1a1aa;
+      --green: #10b981;
       --yellow: #f59e0b;
       --red: #ef4444;
       --orange: #f97316;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
-      line-height: 1.6;
+      line-height: 1.5;
       min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
     }
     .header {
-      background: linear-gradient(135deg, #1a1d27 0%, #12152b 100%);
+      background: var(--surface);
       border-bottom: 1px solid var(--border);
       padding: 2rem 3rem;
     }
     .header h1 {
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       font-weight: 700;
-      background: linear-gradient(90deg, #6c63ff, #00d4aa);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      letter-spacing: -0.02em;
+      color: var(--text);
       margin-bottom: 0.25rem;
     }
-    .header .subtitle { color: var(--text-muted); font-size: 0.9rem; }
+    .header .subtitle { color: var(--text-muted); font-size: 0.82rem; font-family: 'JetBrains Mono', monospace; }
     .container { max-width: 1600px; margin: 0 auto; padding: 2rem 3rem; }
     
     /* Metric Cards */
@@ -50,19 +53,37 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1rem;
-      margin-bottom: 2rem;
+      margin-bottom: 2.5rem;
     }
     .metric-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.25rem 1.5rem;
-      transition: transform 0.2s, box-shadow 0.2s;
+      border-radius: 8px;
+      padding: 1.5rem;
+      transition: border-color 0.2s, background 0.2s;
     }
-    .metric-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(108,99,255,0.15); }
-    .metric-card .label { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
-    .metric-card .value { font-size: 2rem; font-weight: 700; }
-    .metric-card .sub { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .metric-card:hover {
+      border-color: var(--accent);
+      background: var(--surface-hover);
+    }
+    .metric-card .label {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+    .metric-card .value {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .metric-card .sub {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
     .value.good { color: var(--green); }
     .value.warn { color: var(--yellow); }
     .value.bad  { color: var(--red); }
@@ -70,60 +91,71 @@
     .value.accent2 { color: var(--accent2); }
 
     /* Sections */
-    .section { margin-bottom: 2.5rem; }
+    .section { margin-bottom: 3rem; }
     .section-title {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--accent2);
-      border-left: 3px solid var(--accent2);
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--text);
+      text-transform: uppercase;
+      border-left: 2px solid var(--accent);
       padding-left: 0.75rem;
-      margin-bottom: 1rem;
+      margin-bottom: 1.25rem;
     }
 
     /* Compare cards */
     .compare-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      margin-bottom: 2rem;
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
     }
     .compare-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.5rem;
+      border-radius: 8px;
+      padding: 1.75rem;
     }
-    .compare-card h3 { font-size: 0.95rem; margin-bottom: 1rem; }
+    .compare-card h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      letter-spacing: -0.01em;
+    }
     .compare-card.normal h3 { color: var(--accent2); }
     .compare-card.adversarial h3 { color: var(--accent3); }
-    .score-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
-    .score-row .dim { font-size: 0.85rem; color: var(--text-muted); }
-    .score-bar { flex: 1; margin: 0 1rem; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+    .score-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .score-row .dim { font-size: 0.85rem; color: var(--text-muted); width: 140px; }
+    .score-bar { flex: 1; margin: 0 1rem; height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; }
     .score-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
-    .score-val { font-size: 0.85rem; font-weight: 600; min-width: 30px; text-align: right; }
+    .score-val { font-size: 0.85rem; font-weight: 600; min-width: 30px; text-align: right; font-family: 'JetBrains Mono', monospace; }
 
     /* Failure mode table */
     .failure-table {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 8px;
       overflow: hidden;
-      margin-bottom: 2rem;
+      margin-bottom: 2.5rem;
     }
     .failure-table table { width: 100%; border-collapse: collapse; }
     .failure-table th {
-      background: var(--surface2);
-      padding: 0.75rem 1rem;
+      background: var(--surface);
+      padding: 0.75rem 1.25rem;
       text-align: left;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: var(--text-muted);
       border-bottom: 1px solid var(--border);
     }
-    .failure-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .failure-table td {
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
     .failure-table tr:last-child td { border-bottom: none; }
-    .failure-table tr:hover td { background: var(--surface2); }
     .tag {
       display: inline-block;
       padding: 0.2rem 0.6rem;
@@ -132,28 +164,29 @@
       font-weight: 600;
       letter-spacing: 0.02em;
     }
-    .tag-red { background: rgba(239,68,68,0.15); color: #f87171; }
-    .tag-orange { background: rgba(249,115,22,0.15); color: #fb923c; }
-    .tag-yellow { background: rgba(245,158,11,0.15); color: #fbbf24; }
-    .tag-purple { background: rgba(108,99,255,0.15); color: #a78bfa; }
-    .tag-green { background: rgba(34,197,94,0.15); color: #4ade80; }
-    .tag-gray { background: rgba(139,147,181,0.15); color: #8b93b5; }
-    .tag-blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+    .tag-red { background: rgba(244,63,94,0.15); color: #fb7185; }
+    .tag-orange { background: rgba(249,115,22,0.15); color: #fdba74; }
+    .tag-yellow { background: rgba(245,158,11,0.15); color: #fde047; }
+    .tag-purple { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+    .tag-green { background: rgba(16,185,129,0.15); color: #6ee7b7; }
+    .tag-gray { background: rgba(161,161,170,0.15); color: #d4d4d8; }
+    .tag-blue { background: rgba(59,130,246,0.15); color: #93c5fd; }
 
     /* Main table */
     .main-table-wrapper {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 8px;
       overflow: hidden;
     }
     .table-scroll { overflow-x: auto; }
     table.main { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
     table.main th {
-      background: var(--surface2);
-      padding: 0.75rem 1rem;
+      background: var(--surface);
+      padding: 0.85rem 1rem;
       text-align: left;
       font-size: 0.75rem;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: var(--text-muted);
@@ -162,51 +195,79 @@
       cursor: pointer;
       user-select: none;
     }
-    table.main th:hover { color: var(--accent2); }
+    table.main th:hover { color: var(--text); }
     table.main td {
-      padding: 0.7rem 1rem;
+      padding: 0.75rem 1rem;
       border-bottom: 1px solid var(--border);
-      vertical-align: top;
-      max-width: 320px;
+      vertical-align: middle;
+      max-width: 280px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     table.main tr:last-child td { border-bottom: none; }
-    table.main tr:hover td { background: rgba(108,99,255,0.04); }
+    table.main tr:hover td { background: var(--surface-hover); }
     table.main tr.adversarial td { border-left: 3px solid var(--accent3); }
     table.main tr.abstained td { opacity: 0.6; }
-    .msg-cell { max-width: 300px; }
-    .msg-truncate {
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      color: var(--text-muted);
-      cursor: help;
+    
+    .msg-cell-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      width: 100%;
     }
+    .msg-text-truncated {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text-muted);
+      flex: 1;
+    }
+    .btn-read-more {
+      background: var(--accent-muted);
+      border: 1px solid var(--accent);
+      color: var(--text);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .btn-read-more:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+
     .score-chip {
       display: inline-block;
       padding: 0.15rem 0.5rem;
       border-radius: 4px;
       font-weight: 700;
       font-size: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
     }
-    .sc-5 { background: rgba(34,197,94,0.2); color: #4ade80; }
-    .sc-4 { background: rgba(132,204,22,0.15); color: #a3e635; }
+    .sc-5 { background: rgba(16,185,129,0.15); color: #34d399; }
+    .sc-4 { background: rgba(163,230,53,0.15); color: #a3e635; }
     .sc-3 { background: rgba(245,158,11,0.15); color: #fbbf24; }
     .sc-2 { background: rgba(249,115,22,0.15); color: #fb923c; }
-    .sc-1 { background: rgba(239,68,68,0.2); color: #f87171; }
+    .sc-1 { background: rgba(244,63,94,0.15); color: #fb7185; }
 
     /* Outcome badge */
     .outcome-badge {
       display: inline-block;
       padding: 0.2rem 0.6rem;
-      border-radius: 20px;
+      border-radius: 4px;
       font-size: 0.72rem;
       font-weight: 600;
     }
-    .ob-resolved { background: rgba(34,197,94,0.15); color: #4ade80; }
+    .ob-resolved { background: rgba(16,185,129,0.15); color: #34d399; }
     .ob-partial { background: rgba(245,158,11,0.15); color: #fbbf24; }
-    .ob-not { background: rgba(239,68,68,0.15); color: #f87171; }
-    .ob-abstained { background: rgba(108,99,255,0.15); color: #a78bfa; }
+    .ob-not { background: rgba(244,63,94,0.15); color: #fb7185; }
+    .ob-abstained { background: rgba(99,102,241,0.15); color: #a5b4fc; }
 
     .conf-badge {
       display: inline-block;
@@ -215,63 +276,178 @@
       font-size: 0.7rem;
       font-weight: 600;
     }
-    .cb-high { color: #4ade80; }
+    .cb-high { color: #34d399; }
     .cb-medium { color: #fbbf24; }
-    .cb-low { color: #f87171; }
+    .cb-low { color: #fb7185; }
 
-    /* Abstention rate chart */
-    .abst-bar {
+    /* Modal Styling */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-content {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.25rem 1.5rem;
-      margin-bottom: 2rem;
+      border-radius: 8px;
+      width: 95%;
+      max-width: 1150px;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: fadeIn 0.15s ease-out;
     }
-    .abst-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem; }
-    .abst-label { font-size: 0.85rem; min-width: 140px; }
-    .abst-track { flex: 1; height: 10px; background: var(--surface2); border-radius: 5px; overflow: hidden; }
-    .abst-fill { height: 100%; border-radius: 5px; }
-    .abst-val { font-size: 0.85rem; font-weight: 600; min-width: 60px; text-align: right; }
+    @keyframes fadeIn {
+      from { transform: scale(0.97); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .modal-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    .modal-close:hover { color: var(--text); }
+    .modal-body {
+      padding: 1.5rem;
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 900px) {
+      .modal-body { grid-template-columns: 1fr; }
+    }
+    .modal-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .modal-section h3 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.25rem;
+    }
+    .modal-text-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1rem;
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+      color: var(--text);
+      line-height: 1.6;
+      max-height: 380px;
+      overflow-y: auto;
+    }
+    /* Simulated Conversation Chat Logs */
+    .convo-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      max-height: 480px;
+      overflow-y: auto;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+    .chat-bubble {
+      max-width: 85%;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+    .bubble-customer {
+      background: var(--surface-active);
+      color: var(--text);
+      align-self: flex-start;
+      border-bottom-left-radius: 2px;
+    }
+    .bubble-support {
+      background: var(--accent-muted);
+      border: 1px solid var(--accent);
+      color: var(--text);
+      align-self: flex-end;
+      border-bottom-right-radius: 2px;
+    }
+    .bubble-role {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+      color: var(--text-muted);
+    }
 
     .footer {
       text-align: center;
       color: var(--text-muted);
       font-size: 0.8rem;
-      padding: 2rem;
+      padding: 2.5rem;
       border-top: 1px solid var(--border);
-      margin-top: 2rem;
+      margin-top: 3rem;
+      font-family: 'JetBrains Mono', monospace;
     }
 
     /* Search */
-    .table-controls { display: flex; gap: 1rem; margin-bottom: 1rem; align-items: center; flex-wrap: wrap; }
+    .table-controls { display: flex; gap: 0.75rem; margin-bottom: 1.25rem; align-items: center; flex-wrap: wrap; }
     .search-box {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
       color: var(--text);
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       outline: none;
-      width: 250px;
+      width: 280px;
+      font-family: inherit;
     }
     .search-box:focus { border-color: var(--accent); }
     .filter-btn {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
       color: var(--text-muted);
-      font-size: 0.85rem;
+      font-size: 0.8rem;
+      font-weight: 500;
       cursor: pointer;
       transition: all 0.2s;
+      font-family: inherit;
     }
-    .filter-btn:hover, .filter-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(108,99,255,0.08); }
+    .filter-btn:hover, .filter-btn.active { border-color: var(--accent); color: var(--text); background: var(--accent-muted); }
   </style>
 </head>
 <body>
 
 <div class="header">
-  <h1>Hiver AI Email Eval — Full Report</h1>
+  <h1>Hiver AI Email Eval — Pipeline Dashboard</h1>
   <div class="subtitle">Generated July 9, 2026 &nbsp;·&nbsp; Models: gemini-3.1-flash-lite (gen) / gemini-3.1-flash-lite (eval)</div>
 </div>
 
@@ -322,22 +498,22 @@
         <h3>✅ Normal Tickets (n=36)</h3>
         <div class="score-row">
           <span class="dim">Factual Grounding</span>
-          <div class="score-bar"><div class="score-bar-fill" style="width:98%;background:#00d4aa;"></div></div>
+          <div class="score-bar"><div class="score-bar-fill" style="width:98%;background:#10b981;"></div></div>
           <span class="score-val">4.9</span>
         </div>
         <div class="score-row">
           <span class="dim">Tone Match</span>
-          <div class="score-bar"><div class="score-bar-fill" style="width:88%;background:#00d4aa;"></div></div>
+          <div class="score-bar"><div class="score-bar-fill" style="width:88%;background:#10b981;"></div></div>
           <span class="score-val">4.4</span>
         </div>
         <div class="score-row">
           <span class="dim">Resolution</span>
-          <div class="score-bar"><div class="score-bar-fill" style="width:92%;background:#00d4aa;"></div></div>
+          <div class="score-bar"><div class="score-bar-fill" style="width:92%;background:#10b981;"></div></div>
           <span class="score-val">4.6</span>
         </div>
         <div class="score-row">
           <span class="dim">Conciseness</span>
-          <div class="score-bar"><div class="score-bar-fill" style="width:86%;background:#00d4aa;"></div></div>
+          <div class="score-bar"><div class="score-bar-fill" style="width:86%;background:#10b981;"></div></div>
           <span class="score-val">4.3</span>
         </div>
         <div class="score-row" style="margin-top:1rem; border-top: 1px solid var(--border); padding-top: 0.75rem;">
@@ -349,22 +525,22 @@
         <h3>🔴 Adversarial Tickets (n=5)</h3>
         <div class="score-row">
           <span class="dim">Factual Grounding</span>
-          <div class="score-bar"><div class="score-bar-fill" style="width:84%;background:#ff6b6b;"></div></div>
+          <div class="score-bar"><div class="score-bar-fill" style="width:84%;background:#f43f5e;"></div></div>
           <span class="score-val">4.2</span>
         </div>
         <div class="score-row">
           <span class="dim">Tone Match</span>
-          <div class="score-bar"><div class="score-bar-fill" style="width:80%;background:#ff6b6b;"></div></div>
+          <div class="score-bar"><div class="score-bar-fill" style="width:80%;background:#f43f5e;"></div></div>
           <span class="score-val">4.0</span>
         </div>
         <div class="score-row">
           <span class="dim">Resolution</span>
-          <div class="score-bar"><div class="score-bar-fill" style="width:76%;background:#ff6b6b;"></div></div>
+          <div class="score-bar"><div class="score-bar-fill" style="width:76%;background:#f43f5e;"></div></div>
           <span class="score-val">3.8</span>
         </div>
         <div class="score-row">
           <span class="dim">Conciseness</span>
-          <div class="score-bar"><div class="score-bar-fill" style="width:78%;background:#ff6b6b;"></div></div>
+          <div class="score-bar"><div class="score-bar-fill" style="width:78%;background:#f43f5e;"></div></div>
           <span class="score-val">3.9</span>
         </div>
         <div class="score-row" style="margin-top:1rem; border-top: 1px solid var(--border); padding-top: 0.75rem;">
@@ -393,7 +569,7 @@
             <td><span class="tag tag-red">hallucinated_policy</span></td>
             <td><strong>1</strong></td>
             <td>100.0%</td>
-            <td><div style="height:8px;width:100%;max-width:200px;background:#6c63ff;border-radius:4px;opacity:0.7;"></div></td>
+            <td><div style="height:8px;width:100%;max-width:200px;background:#6366f1;border-radius:4px;opacity:0.7;"></div></td>
           </tr>
         </tbody>
       </table>
@@ -415,8 +591,8 @@
         <table class="main" id="mainTable">
           <thead>
             <tr>
-              <th onclick="sortTable(0)">ID</th>
-              <th onclick="sortTable(1)">Category</th>
+              <th onclick="sortTable(0)">ID ↕</th>
+              <th onclick="sortTable(1)">Category ↕</th>
               <th>Mood</th>
               <th>Type</th>
               <th>Customer Message</th>
@@ -439,8 +615,8 @@
               <td><span class="tag tag-blue">bug</span></td>
               <td>angry</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I tried to reset my password five times now...">I tried to reset my password...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I am very sorry to hear that you are unable to access your account...">I am very sorry to hear that...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I tried to reset my password five times now, and I never receive...</span><button class="btn-read-more" onclick="showModal('ticket_001', 'Bug — Angry', 'I tried to reset my password five times now, and I never receive the recovery link in my inbox. I checked my spam folder and verified my email address, but nothing is showing up. This is preventing me from accessing my account entirely.', 'I am very sorry to hear that you are unable to access your account; I understand how frustrating it is to be locked out when you need to get work done. I have escalated this report to our technical team for immediate triage, as account access issues are treated with high priority. To help us resolve this as quickly as possible, could you please provide your browser and OS version, as well as any specific error messages you might be seeing? In the meantime, please check our status page at status.example.com to ensure there are no known system-wide issues affecting our authentication services. Once we have your technical details, we will assign a severity level to your case and work to get you back into your account promptly.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I am very sorry to hear that you are unable to access your account; I understand how frustrating it is to be locked out when you need to get work done...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I checked my spam folder and did everything. I still don\'t have the link and I\'m locked out. Can\'t you just reset it from your end?&quot;}, {&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I understand your urgency. I have escalated this to our tier 2 technical team to inspect our mail server logs and manually reset your credentials. They will contact you shortly.&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;Okay, thank you. Please hurry, I have deadlines.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I am very sorry to hear that you are unable to access your account...</span><button class="btn-read-more" onclick="showModal('ticket_001', 'Bug — Angry', 'I tried to reset my password five times now, and I never receive the recovery link in my inbox. I checked my spam folder and verified my email address, but nothing is showing up. This is preventing me from accessing my account entirely.', 'I am very sorry to hear that you are unable to access your account; I understand how frustrating it is to be locked out when you need to get work done. I have escalated this report to our technical team for immediate triage, as account access issues are treated with high priority. To help us resolve this as quickly as possible, could you please provide your browser and OS version, as well as any specific error messages you might be seeing? In the meantime, please check our status page at status.example.com to ensure there are no known system-wide issues affecting our authentication services. Once we have your technical details, we will assign a severity level to your case and work to get you back into your account promptly.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I am very sorry to hear that you are unable to access your account; I understand how frustrating it is to be locked out when you need to get work done...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I checked my spam folder and did everything. I still don\'t have the link and I\'m locked out. Can\'t you just reset it from your end?&quot;}, {&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I understand your urgency. I have escalated this to our tier 2 technical team to inspect our mail server logs and manually reset your credentials. They will contact you shortly.&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;Okay, thank you. Please hurry, I have deadlines.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-3">3</span></td>
@@ -457,8 +633,8 @@
               <td><span class="tag tag-blue">churn-risk</span></td>
               <td>angry</td>
               <td><span class="tag tag-orange">hostile_tone</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I AM ABSOLUTELY DONE WITH YOUR INCOMPETENT SERVICE!...">I AM ABSOLUTELY DONE WITH...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I am truly sorry to hear about the frustration...">I am truly sorry to hear...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I AM ABSOLUTELY DONE WITH YOUR INCOMPETENT SERVICE! YOU HAVE CHARGED...</span><button class="btn-read-more" onclick="showModal('ticket_003', 'Churn-risk — Angry', 'I AM ABSOLUTELY DONE WITH YOUR INCOMPETENT SERVICE! YOU HAVE CHARGED MY CREDIT CARD THREE TIMES THIS MONTH FOR A BUGGY PLATFORM THAT NEVER EVEN LOADS. REFUND EVERY SINGLE CENT IMMEDIATELY OR I AM FILING A DISPUTE WITH MY BANK AND TELLING EVERYONE I KNOW TO AVOID YOU CLOWNS!', 'I am truly sorry to hear about the frustration you have experienced with our platform and the billing issues you\'ve encountered; I understand how upsetting it is to see unexpected charges. I have escalated your account to our Account Management team to investigate these multiple charges and address your pricing concerns immediately. While our policy does not allow for pro-rated refunds for mid-year cancellations outside of the 30-day money-back guarantee, we are committed to resolving these billing errors. In the meantime, if you would like to discuss the technical issues you are facing, I would be happy to schedule a free 30-minute success check-in call to help get your account running smoothly. Please let me know if you would like to proceed with that call while our team reviews your billing history.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I am truly sorry to hear about the frustration you have experienced with our platform and the billing issues you\'ve encountered...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;Are you kidding me? I am not canceling! I was charged THREE TIMES. I want my money back for the duplicate charges, not a success call!&quot;}, {&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I apologize for the misunderstanding. I have now escalated this directly to our billing department to reverse the duplicate transactions on June 1st. You will see the credit in 3-5 days.&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;Ensure that is done. This was highly frustrating.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I am truly sorry to hear about the frustration you have experienced...</span><button class="btn-read-more" onclick="showModal('ticket_003', 'Churn-risk — Angry', 'I AM ABSOLUTELY DONE WITH YOUR INCOMPETENT SERVICE! YOU HAVE CHARGED MY CREDIT CARD THREE TIMES THIS MONTH FOR A BUGGY PLATFORM THAT NEVER EVEN LOADS. REFUND EVERY SINGLE CENT IMMEDIATELY OR I AM FILING A DISPUTE WITH MY BANK AND TELLING EVERYONE I KNOW TO AVOID YOU CLOWNS!', 'I am truly sorry to hear about the frustration you have experienced with our platform and the billing issues you\'ve encountered; I understand how upsetting it is to see unexpected charges. I have escalated your account to our Account Management team to investigate these multiple charges and address your pricing concerns immediately. While our policy does not allow for pro-rated refunds for mid-year cancellations outside of the 30-day money-back guarantee, we are committed to resolving these billing errors. In the meantime, if you would like to discuss the technical issues you are facing, I would be happy to schedule a free 30-minute success check-in call to help get your account running smoothly. Please let me know if you would like to proceed with that call while our team reviews your billing history.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I am truly sorry to hear about the frustration you have experienced with our platform and the billing issues you\'ve encountered...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;Are you kidding me? I am not canceling! I was charged THREE TIMES. I want my money back for the duplicate charges, not a success call!&quot;}, {&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I apologize for the misunderstanding. I have now escalated this directly to our billing department to reverse the duplicate transactions on June 1st. You will see the credit in 3-5 days.&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;Ensure that is done. This was highly frustrating.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-1">1</span></td>
               <td><span class="score-chip sc-2">2</span></td>
@@ -475,8 +651,8 @@
               <td><span class="tag tag-blue">refund</span></td>
               <td>neutral</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I am writing to request a refund for my recent purchase...">I am writing to request...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Hello, thank you for reaching out. I am sorry to hear...">Hello, thank you for reaching...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I am writing to request a refund for my recent purchase because...</span><button class="btn-read-more" onclick="showModal('ticket_006', 'Refund — Neutral', 'I am writing to request a refund for my recent purchase because the software is not compatible with my operating system. I tried following the installation guide, but it simply crashes upon startup every time. Please let me know the steps to process this return.', 'Hello, thank you for reaching out. I am sorry to hear that you are experiencing crashes with our software, and I would be happy to assist you with your refund request. Since our policy allows for refunds on digital products within 14 days of purchase, please provide your order ID so I can verify your eligibility. If the software is confirmed to be non-functional as described, we can proceed with the refund to your original payment method. Once processed, funds typically appear within 3–5 business days. Please let me know your order details so we can move forward.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello, thank you for reaching out. I am sorry to hear that you are experiencing crashes with our software...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;Thank you. My order ID is ORD-50284. Please go ahead with the refund.&quot;}, {&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Thank you for the order ID. I have processed the refund for ORD-50284, and the money should return to your original card in 3-5 business days.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Hello, thank you for reaching out. I am sorry to hear that you...</span><button class="btn-read-more" onclick="showModal('ticket_006', 'Refund — Neutral', 'I am writing to request a refund for my recent purchase because the software is not compatible with my operating system. I tried following the installation guide, but it simply crashes upon startup every time. Please let me know the steps to process this return.', 'Hello, thank you for reaching out. I am sorry to hear that you are experiencing crashes with our software, and I would be happy to assist you with your refund request. Since our policy allows for refunds on digital products within 14 days of purchase, please provide your order ID so I can verify your eligibility. If the software is confirmed to be non-functional as described, we can proceed with the refund to your original payment method. Once processed, funds typically appear within 3–5 business days. Please let me know your order details so we can move forward.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello, thank you for reaching out. I am sorry to hear that you are experiencing crashes with our software...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;Thank you. My order ID is ORD-50284. Please go ahead with the refund.&quot;}, {&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Thank you for the order ID. I have processed the refund for ORD-50284, and the money should return to your original card in 3-5 business days.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-5">5</span></td>
@@ -493,8 +669,8 @@
               <td><span class="tag tag-blue">bug</span></td>
               <td>angry</td>
               <td><span class="tag tag-orange">hostile_tone</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="YOUR SOFTWARE IS ABSOLUTELY PATHETIC...">YOUR SOFTWARE IS ABSOLUTELY...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I am very sorry to hear about the frustration...">I am very sorry to hear...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">YOUR SOFTWARE IS ABSOLUTELY PATHETIC AND COMPLETELY BROKEN! I HAVE...</span><button class="btn-read-more" onclick="showModal('ticket_007', 'Bug — Angry', 'YOUR SOFTWARE IS ABSOLUTELY PATHETIC AND COMPLETELY BROKEN! I HAVE TRIED TO ACCESS MY DASHBOARD THREE TIMES TODAY AND IT JUST CRASHES EVERY SINGLE TIME. FIX THIS USELESS BUG IMMEDIATELY BEFORE I CANCEL MY ENTIRE SUBSCRIPTION AND DEMAND A FULL REFUND FOR YOUR INCOMPETENCE!', 'I am very sorry to hear about the frustration you are experiencing with your dashboard, and I completely understand how disruptive this is to your workflow. Please rest assured that we take reports of system crashes very seriously, and I have escalated this to our technical team for immediate triage. To help us resolve this as quickly as possible, could you please provide your browser and OS version, the specific steps to reproduce the crash, and any error messages or screenshots you may have encountered? Once we have these details, we will assign a severity level to your report and provide you with a clear timeline for the fix. In the meantime, you can check status.example.com to see if this is a known issue currently being tracked by our team.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I am very sorry to hear about the frustration you are experiencing with your dashboard...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I am using Chrome on Windows 11. It crashes as soon as I click the sales tab. Please fix this soon.&quot;}, {&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Thank you for the browser details. Our P2 bug team is on it now and a hotfix is scheduled for deployment tonight.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I am very sorry to hear about the frustration you are experiencing...</span><button class="btn-read-more" onclick="showModal('ticket_007', 'Bug — Angry', 'YOUR SOFTWARE IS ABSOLUTELY PATHETIC AND COMPLETELY BROKEN! I HAVE TRIED TO ACCESS MY DASHBOARD THREE TIMES TODAY AND IT JUST CRASHES EVERY SINGLE TIME. FIX THIS USELESS BUG IMMEDIATELY BEFORE I CANCEL MY ENTIRE SUBSCRIPTION AND DEMAND A FULL REFUND FOR YOUR INCOMPETENCE!', 'I am very sorry to hear about the frustration you are experiencing with your dashboard, and I completely understand how disruptive this is to your workflow. Please rest assured that we take reports of system crashes very seriously, and I have escalated this to our technical team for immediate triage. To help us resolve this as quickly as possible, could you please provide your browser and OS version, the specific steps to reproduce the crash, and any error messages or screenshots you may have encountered? Once we have these details, we will assign a severity level to your report and provide you with a clear timeline for the fix. In the meantime, you can check status.example.com to see if this is a known issue currently being tracked by our team.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I am very sorry to hear about the frustration you are experiencing with your dashboard...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I am using Chrome on Windows 11. It crashes as soon as I click the sales tab. Please fix this soon.&quot;}, {&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Thank you for the browser details. Our P2 bug team is on it now and a hotfix is scheduled for deployment tonight.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-4">4</span></td>
@@ -511,8 +687,8 @@
               <td><span class="tag tag-blue">refund</span></td>
               <td>polite</td>
               <td><span class="tag tag-purple">policy_violation_request</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I am writing to kindly request a full refund...">I am writing to kindly request...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Dear Customer, thank you for reaching out...">Dear Customer, thank you for...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I am writing to kindly request a full refund for my annual...</span><button class="btn-read-more" onclick="showModal('ticket_008', 'Refund — Polite', 'I am writing to kindly request a full refund for my annual subscription, which I purchased exactly seven months ago. Although I understand this falls outside of your standard 30-day window, I have barely used the service and would truly appreciate an exception to your policy.', 'Dear Customer, thank you for reaching out to us. I understand that you have not been using the service as much as you anticipated, and I appreciate you bringing this to our attention. Regarding your request, our policy states that subscription cancellations do not automatically trigger a refund, and we are unable to process refunds for annual subscriptions purchased seven months ago as they fall well outside our standard refund windows. Per our policy, you will retain full access to your subscription features until the end of your current paid period. We appreciate your understanding in this matter and are here to help if you have any other questions regarding your account settings.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Dear Customer, thank you for reaching out to us. I understand that you have not been using the service as much as you anticipated...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I understand. Since I paid for the year, I will make sure we export all data before the cycle ends. Thanks.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Dear Customer, thank you for reaching out to us. I understand...</span><button class="btn-read-more" onclick="showModal('ticket_008', 'Refund — Polite', 'I am writing to kindly request a full refund for my annual subscription, which I purchased exactly seven months ago. Although I understand this falls outside of your standard 30-day window, I have barely used the service and would truly appreciate an exception to your policy.', 'Dear Customer, thank you for reaching out to us. I understand that you have not been using the service as much as you anticipated, and I appreciate you bringing this to our attention. Regarding your request, our policy states that subscription cancellations do not automatically trigger a refund, and we are unable to process refunds for annual subscriptions purchased seven months ago as they fall well outside our standard refund windows. Per our policy, you will retain full access to your subscription features until the end of your current paid period. We appreciate your understanding in this matter and are here to help if you have any other questions regarding your account settings.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Dear Customer, thank you for reaching out to us. I understand that you have not been using the service as much as you anticipated...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I understand. Since I paid for the year, I will make sure we export all data before the cycle ends. Thanks.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-5">5</span></td>
@@ -529,8 +705,8 @@
               <td><span class="tag tag-blue">bug</span></td>
               <td>confused</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I see a strange error code 'ERR_502'...">I see a strange error code...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Hello, thank you for reaching out and I apologize...">Hello, thank you for reaching...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I see a strange error code 'ERR_502' popping up whenever...</span><button class="btn-read-more" onclick="showModal('ticket_009', 'Bug — Confused', 'I see a strange error code \'ERR_502\' popping up whenever I try to update my billing information. I am not sure what this means or if my payment details are actually being saved. Could you please clarify what is going on here?', 'Hello, thank you for reaching out and I apologize for the confusion caused by this error. An \'ERR_502\' indicates a server-side issue, and I want to ensure your billing information is handled securely. To help our engineering team triage this issue effectively, could you please provide your browser and OS version, the specific steps you are taking to update your billing, and a screenshot of the error? Once we have these details, we will assign a severity level to your report and provide you with a target resolution timeline based on our support policy. In the meantime, you can check our public status page at status.example.com to see if this is a known issue currently being addressed.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello, thank you for reaching out and I apologize for the confusion caused by this error...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;Okay, the status page says systems are operational now and I was able to save my card. Thanks!&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Hello, thank you for reaching out and I apologize for the...</span><button class="btn-read-more" onclick="showModal('ticket_009', 'Bug — Confused', 'I see a strange error code \'ERR_502\' popping up whenever I try to update my billing information. I am not sure what this means or if my payment details are actually being saved. Could you please clarify what is going on here?', 'Hello, thank you for reaching out and I apologize for the confusion caused by this error. An \'ERR_502\' indicates a server-side issue, and I want to ensure your billing information is handled securely. To help our engineering team triage this issue effectively, could you please provide your browser and OS version, the specific steps you are taking to update your billing, and a screenshot of the error? Once we have these details, we will assign a severity level to your report and provide you with a target resolution timeline based on our support policy. In the meantime, you can check our public status page at status.example.com to see if this is a known issue currently being addressed.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello, thank you for reaching out and I apologize for the confusion caused by this error...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;Okay, the status page says systems are operational now and I was able to save my card. Thanks!&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-5">5</span></td>
@@ -547,8 +723,8 @@
               <td><span class="tag tag-blue">shipping</span></td>
               <td>polite</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I am so sorry to bother you, but I was wondering...">I am so sorry to bother you...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Hello! Thank you for reaching out to us...">Hello! Thank you for reaching...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I am so sorry to bother you, but I was wondering if you could...</span><button class="btn-read-more" onclick="showModal('ticket_010', 'Shipping — Polite', 'I am so sorry to bother you, but I was wondering if you could provide a signature upon delivery for my order? It contains some expensive electronics and I want to make sure it doesn\'t get left unattended on my porch.', 'Hello! Thank you for reaching out to us. I would be happy to assist you with your request regarding your order. According to our shipping policy, a signature-on-delivery is automatically required for all orders over $200 to ensure their safety. If your order total is below that amount, please provide your order number so I can check if we are able to add that requirement for you. We want to ensure your electronics arrive safely, and I look forward to helping you further once I have those details.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello! Thank you for reaching out to us. I would be happy to assist you with your request...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;My order total is $245, so it sounds like I am already covered. Thanks for confirming!&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Hello! Thank you for reaching out to us. I would be happy...</span><button class="btn-read-more" onclick="showModal('ticket_010', 'Shipping — Polite', 'I am so sorry to bother you, but I was wondering if you could provide a signature upon delivery for my order? It contains some expensive electronics and I want to make sure it doesn\'t get left unattended on my porch.', 'Hello! Thank you for reaching out to us. I would be happy to assist you with your request regarding your order. According to our shipping policy, a signature-on-delivery is automatically required for all orders over $200 to ensure their safety. If your order total is below that amount, please provide your order number so I can check if we are able to add that requirement for you. We want to ensure your electronics arrive safely, and I look forward to helping you further once I have those details.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello! Thank you for reaching out to us. I would be happy to assist you with your request...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;My order total is $245, so it sounds like I am already covered. Thanks for confirming!&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-5">5</span></td>
@@ -565,8 +741,8 @@
               <td><span class="tag tag-blue">billing</span></td>
               <td>polite</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I accidentally signed up for the wrong tier...">I accidentally signed up...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Hello! Thank you for reaching out to us...">Hello! Thank you for reaching...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I accidentally signed up for the wrong tier and would like to...</span><button class="btn-read-more" onclick="showModal('ticket_011', 'Billing — Polite', 'I accidentally signed up for the wrong tier and would like to downgrade my plan to the basic version. Can you adjust my billing to reflect the cheaper price for the current month? I would appreciate your help with this mistake.', 'Hello! Thank you for reaching out to us. I would be happy to assist you with your plan downgrade. According to our billing policy, we issue pro-rated refunds if a paid plan is downgraded within the first 7 days of the billing cycle. Could you please confirm the date you signed up for the current plan so I can verify if your request falls within this window? Once confirmed, you can proceed with the downgrade in your account settings, and we will process the appropriate adjustment for you.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello! Thank you for reaching out to us. I would be happy to assist you with your plan downgrade...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I signed up yesterday, so I\'m within the 7 days. I will downgrade now. Thank you!&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Hello! Thank you for reaching out to us. I would be...</span><button class="btn-read-more" onclick="showModal('ticket_011', 'Billing — Polite', 'I accidentally signed up for the wrong tier and would like to downgrade my plan to the basic version. Can you adjust my billing to reflect the cheaper price for the current month? I would appreciate your help with this mistake.', 'Hello! Thank you for reaching out to us. I would be happy to assist you with your plan downgrade. According to our billing policy, we issue pro-rated refunds if a paid plan is downgraded within the first 7 days of the billing cycle. Could you please confirm the date you signed up for the current plan so I can verify if your request falls within this window? Once confirmed, you can proceed with the downgrade in your account settings, and we will process the appropriate adjustment for you.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello! Thank you for reaching out to us. I would be happy to assist you with your plan downgrade...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I signed up yesterday, so I\'m within the 7 days. I will downgrade now. Thank you!&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-5">5</span></td>
@@ -583,8 +759,8 @@
               <td><span class="tag tag-blue">bug</span></td>
               <td>confused</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I am confused because the subscription page...">I am confused because the...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Hello, thank you for reaching out, and I am sorry...">Hello, thank you for reaching...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I am confused because the subscription page says I have the...</span><button class="btn-read-more" onclick="showModal('ticket_012', 'Bug — Confused', 'I am confused because the subscription page says I have the Premium plan, but I cannot access any of the advanced features. The buttons for these tools are grayed out even though I paid for my renewal yesterday. Could you help me understand why this is happening?', 'Hello, thank you for reaching out, and I am sorry to hear you are experiencing trouble accessing your Premium features after your recent renewal. I understand how frustrating it is to have paid for a service that is currently showing as unavailable. To help me investigate this as a potential bug, could you please provide your browser and OS version, along with a screenshot of the grayed-out buttons? Once I have this information, I will triage this report within one business day and assign it a severity level to ensure it is addressed appropriately. In the meantime, please check our status page at status.example.com to see if this is a known issue affecting our platform.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello, thank you for reaching out, and I am sorry to hear you are experiencing trouble accessing your Premium features...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;Here is the screenshot. I paid yesterday but features are still grayed out.&quot;}, {&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Thank you. Our database records show the billing updated, but your local session needs refresh. Please log out and log back in.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Hello, thank you for reaching out, and I am sorry to hear...</span><button class="btn-read-more" onclick="showModal('ticket_012', 'Bug — Confused', 'I am confused because the subscription page says I have the Premium plan, but I cannot access any of the advanced features. The buttons for these tools are grayed out even though I paid for my renewal yesterday. Could you help me understand why this is happening?', 'Hello, thank you for reaching out, and I am sorry to hear you are experiencing trouble accessing your Premium features after your recent renewal. I understand how frustrating it is to have paid for a service that is currently showing as unavailable. To help me investigate this as a potential bug, could you please provide your browser and OS version, along with a screenshot of the grayed-out buttons? Once I have this information, I will triage this report within one business day and assign it a severity level to ensure it is addressed appropriately. In the meantime, please check our status page at status.example.com to see if this is a known issue affecting our platform.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello, thank you for reaching out, and I am sorry to hear you are experiencing trouble accessing your Premium features...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;Here is the screenshot. I paid yesterday but features are still grayed out.&quot;}, {&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Thank you. Our database records show the billing updated, but your local session needs refresh. Please log out and log back in.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-4">4</span></td>
@@ -601,8 +777,8 @@
               <td><span class="tag tag-blue">bug</span></td>
               <td>frustrated</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Your mobile app keeps crashing every time...">Your mobile app keeps...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I am very sorry to hear that you are experiencing...">I am very sorry to hear that...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Your mobile app keeps crashing every time I try to add...</span><button class="btn-read-more" onclick="showModal('ticket_013', 'Bug — Frustrated', 'Your mobile app keeps crashing every time I try to add an item to my shopping cart. This is the third time today, and it is incredibly annoying because I am trying to finish my purchase before the sale ends. Please fix this immediately.', 'I am very sorry to hear that you are experiencing crashes while trying to complete your purchase; I understand how frustrating it is to deal with technical issues during a sale. To ensure our engineering team can investigate this immediately, could you please provide your mobile device model, the operating system version, and the specific steps you are taking when the crash occurs? Additionally, if you have any screenshots or error messages, please attach them to this thread. Once we receive these details, we will triage this report within one business day and assign it a severity level to ensure it is addressed as quickly as possible. In the meantime, you may want to check status.example.com to see if this is a known issue currently being tracked.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I am very sorry to hear that you are experiencing crashes while trying to complete your purchase...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I used the website instead of the app and completed my purchase. Thanks for the quick response.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I am very sorry to hear that you are experiencing crashes...</span><button class="btn-read-more" onclick="showModal('ticket_013', 'Bug — Frustrated', 'Your mobile app keeps crashing every time I try to add an item to my shopping cart. This is the third time today, and it is incredibly annoying because I am trying to finish my purchase before the sale ends. Please fix this immediately.', 'I am very sorry to hear that you are experiencing crashes while trying to complete your purchase; I understand how frustrating it is to deal with technical issues during a sale. To ensure our engineering team can investigate this immediately, could you please provide your mobile device model, the operating system version, and the specific steps you are taking when the crash occurs? Additionally, if you have any screenshots or error messages, please attach them to this thread. Once we receive these details, we will triage this report within one business day and assign it a severity level to ensure it is addressed as quickly as possible. In the meantime, you may want to check status.example.com to see if this is a known issue currently being tracked.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I am very sorry to hear that you are experiencing crashes while trying to complete your purchase...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I used the website instead of the app and completed my purchase. Thanks for the quick response.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-5">5</span></td>
@@ -619,8 +795,8 @@
               <td><span class="tag tag-blue">churn-risk</span></td>
               <td>neutral</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I noticed that your software lacks the API integration...">I noticed that your software...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Hi there, thank you for reaching out and sharing...">Hi there, thank you for reaching...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I noticed that your software lacks the API integration we...</span><button class="btn-read-more" onclick="showModal('ticket_014', 'Churn-risk — Neutral', 'I noticed that your software lacks the API integration we need for our new shipping provider. I really enjoy the interface, but this missing functionality is a dealbreaker for our workflow. Unless you have a timeline for this feature, I\'ll have to cancel my plan next week.', 'Hi there, thank you for reaching out and sharing your feedback regarding our API integrations. I completely understand how critical shipping provider connectivity is to your workflow, and I would be happy to check our product roadmap for any updates on this feature. Before you make a final decision, I would love to offer you a free 30-minute success check-in call to discuss your specific needs and see if there are any workarounds we can implement. Additionally, if you are considering cancellation due to pricing or budget concerns, please let me know so I can escalate this to our Account Management team to explore custom options for you. If you still decide to move forward, you can cancel at any time via Account Settings → Subscription → Cancel Plan, and you will retain read-only access to your data for 60 days following your subscription end date.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hi there, thank you for reaching out and sharing your feedback regarding our API integrations...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I will schedule a success call to see if a workaround is possible. Thanks for offering.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Hi there, thank you for reaching out and sharing your...</span><button class="btn-read-more" onclick="showModal('ticket_014', 'Churn-risk — Neutral', 'I noticed that your software lacks the API integration we need for our new shipping provider. I really enjoy the interface, but this missing functionality is a dealbreaker for our workflow. Unless you have a timeline for this feature, I\'ll have to cancel my plan next week.', 'Hi there, thank you for reaching out and sharing your feedback regarding our API integrations. I completely understand how critical shipping provider connectivity is to your workflow, and I would be happy to check our product roadmap for any updates on this feature. Before you make a final decision, I would love to offer you a free 30-minute success check-in call to discuss your specific needs and see if there are any workarounds we can implement. Additionally, if you are considering cancellation due to pricing or budget concerns, please let me know so I can escalate this to our Account Management team to explore custom options for you. If you still decide to move forward, you can cancel at any time via Account Settings → Subscription → Cancel Plan, and you will retain read-only access to your data for 60 days following your subscription end date.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hi there, thank you for reaching out and sharing your feedback regarding our API integrations...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I will schedule a success call to see if a workaround is possible. Thanks for offering.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-5">5</span></td>
@@ -637,8 +813,8 @@
               <td><span class="tag tag-blue">bug</span></td>
               <td>neutral</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I am trying to export my monthly analytics report...">I am trying to export my monthly...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Hi there, thank you for reaching out...">Hi there, thank you for reaching...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I am trying to export my monthly analytics report, but...</span><button class="btn-read-more" onclick="showModal('ticket_015', 'Bug — Neutral', 'I am trying to export my monthly analytics report, but the PDF download button does nothing when I click it. I have tried refreshing the page and using a different browser, but the issue persists. Could you please look into this?', 'Hi there, thank you for reaching out. I am sorry to hear you are having trouble with the PDF export feature, and I would be happy to help you get this resolved. To ensure our engineering team can triage this issue effectively, could you please provide your browser and OS versions, any specific error messages you see in the console, and a screenshot or screen recording of the behavior? Once we have these details, we will assign a severity level to your report and provide you with a timeline for the fix based on our support policy. In the meantime, you can check status.example.com to see if this is a known issue currently being tracked.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hi there, thank you for reaching out. I am sorry to hear you are having trouble with the PDF export...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I cleared my browser cache as suggested in your documentation link and it worked! Thank you.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Hi there, thank you for reaching out. I am sorry to hear...</span><button class="btn-read-more" onclick="showModal('ticket_015', 'Bug — Neutral', 'I am trying to export my monthly analytics report, but the PDF download button does nothing when I click it. I have tried refreshing the page and using a different browser, but the issue persists. Could you please look into this?', 'Hi there, thank you for reaching out. I am sorry to hear you are having trouble with the PDF export feature, and I would be happy to help you get this resolved. To ensure our engineering team can triage this issue effectively, could you please provide your browser and OS versions, any specific error messages you see in the console, and a screenshot or screen recording of the behavior? Once we have these details, we will assign a severity level to your report and provide you with a timeline for the fix based on our support policy. In the meantime, you can check status.example.com to see if this is a known issue currently being tracked.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hi there, thank you for reaching out. I am sorry to hear you are having trouble with the PDF export...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I cleared my browser cache as suggested in your documentation link and it worked! Thank you.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-5">5</span></td>
@@ -655,8 +831,8 @@
               <td><span class="tag tag-blue">churn-risk</span></td>
               <td>angry</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="The mobile app is virtually unusable because...">The mobile app is virtually...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I am truly sorry to hear about the frustration...">I am truly sorry to hear...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">The mobile app is virtually unusable because it loads a blank...</span><button class="btn-read-more" onclick="showModal('ticket_016', 'Churn-risk — Angry', 'The mobile app is virtually unusable because it loads a blank white screen every time I try to view my dashboard. I rely on mobile access for my business travel, and this bug makes your service useless to me. Please fix this or I am cancelling my subscription.', 'I am truly sorry to hear about the frustration caused by the blank screen issue on our mobile app, especially since you rely on it for your business travel. I have escalated this technical bug to our engineering team as a priority to get it resolved for you. Before you make any decisions regarding your subscription, I would love to offer you a free 30-minute customer success check-in to discuss these concerns and see if we can improve your experience. If you still wish to proceed with cancellation, you can do so at any time via Account Settings → Subscription → Cancel Plan, and please note that you would retain read-only access to your data for 60 days following the subscription end date. We truly value your business and would appreciate it if you could share any additional details about your device or app version so we can expedite the fix.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I am truly sorry to hear about the frustration caused by the blank screen issue...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I can\'t check in to success when my app doesn\'t load a single thing! Just tell me when the blank screen bug is fixed.&quot;}, {&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I understand. I have escalated this as a P1 incident to our mobile team. A hotfix will be submitted to the App Store within 12 hours.&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;Ensure that is done. This was highly frustrating.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I am truly sorry to hear about the frustration caused by the...</span><button class="btn-read-more" onclick="showModal('ticket_016', 'Churn-risk — Angry', 'The mobile app is virtually unusable because it loads a blank white screen every time I try to view my dashboard. I rely on mobile access for my business travel, and this bug makes your service useless to me. Please fix this or I am cancelling my subscription.', 'I am truly sorry to hear about the frustration caused by the blank screen issue on our mobile app, especially since you rely on it for your business travel. I have escalated this technical bug to our engineering team as a priority to get it resolved for you. Before you make any decisions regarding your subscription, I would love to offer you a free 30-minute customer success check-in to discuss these concerns and see if we can improve your experience. If you still wish to proceed with cancellation, you can do so at any time via Account Settings → Subscription → Cancel Plan, and please note that you would retain read-only access to your data for 60 days following the subscription end date. We truly value your business and would appreciate it if you could share any additional details about your device or app version so we can expedite the fix.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I am truly sorry to hear about the frustration caused by the blank screen issue...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I can\'t check in to success when my app doesn\'t load a single thing! Just tell me when the blank screen bug is fixed.&quot;}, {&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I understand. I have escalated this as a P1 incident to our mobile team. A hotfix will be submitted to the App Store within 12 hours.&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;Ensure that is done. This was highly frustrating.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-2">2</span></td>
@@ -673,8 +849,8 @@
               <td><span class="tag tag-blue">billing</span></td>
               <td>angry</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="This is unacceptable! I canceled my account...">This is unacceptable! I canceled...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Dear Customer, I am very sorry to hear about...">Dear Customer, I am very sorry...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">This is unacceptable! I canceled my account three months ago...</span><button class="btn-read-more" onclick="showModal('ticket_017', 'Billing — Angry', 'This is unacceptable! I canceled my account three months ago and yet I am still receiving monthly charges on my bank statement. Stop taking money from my account immediately and refund the unauthorized transactions.', 'Dear Customer, I am very sorry to hear about the frustration these unexpected charges have caused you, and I understand how upsetting it is to see charges on your account after you believed it was canceled. To investigate this immediately, I need you to provide the email address associated with the account or the specific transaction dates so I can locate your billing history. Please note that per our billing policy, disputes must be raised within 30 days of the charge date, but I will prioritize reviewing your account status to ensure no further charges occur. Once we identify the account, I can help you verify its current status and ensure your payment method is removed if the account is indeed closed. Thank you for your patience while we resolve this.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Dear Customer, I am very sorry to hear about the frustration these unexpected charges have caused you...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;Are you seriously telling me about a 30-day limit when your company has been stealing my money for three months? I cancelled my plan!&quot;}, {&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I apologize. I have verified your cancellation date and processed a full refund for the past three billing cycles. No further charges will occur.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Dear Customer, I am very sorry to hear about the frustration...</span><button class="btn-read-more" onclick="showModal('ticket_017', 'Billing — Angry', 'This is unacceptable! I canceled my account three months ago and yet I am still receiving monthly charges on my bank statement. Stop taking money from my account immediately and refund the unauthorized transactions.', 'Dear Customer, I am very sorry to hear about the frustration these unexpected charges have caused you, and I understand how upsetting it is to see charges on your account after you believed it was canceled. To investigate this immediately, I need you to provide the email address associated with the account or the specific transaction dates so I can locate your billing history. Please note that per our billing policy, disputes must be raised within 30 days of the charge date, but I will prioritize reviewing your account status to ensure no further charges occur. Once we identify the account, I can help you verify its current status and ensure your payment method is removed if the account is indeed closed. Thank you for your patience while we resolve this.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Dear Customer, I am very sorry to hear about the frustration these unexpected charges have caused you...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;Are you seriously telling me about a 30-day limit when your company has been stealing my money for three months? I cancelled my plan!&quot;}, {&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I apologize. I have verified your cancellation date and processed a full refund for the past three billing cycles. No further charges will occur.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-3">3</span></td>
               <td><span class="score-chip sc-2">2</span></td>
@@ -691,8 +867,8 @@
               <td><span class="tag tag-blue">refund</span></td>
               <td>frustrated</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I have been waiting for my refund for three weeks...">I have been waiting for my...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Dear Customer, I sincerely apologize...">Dear Customer, I sincerely...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I have been waiting for my refund for three weeks now despite...</span><button class="btn-read-more" onclick="showModal('ticket_018', 'Refund — Frustrated', 'I have been waiting for my refund for three weeks now despite your team confirming it was processed on the 10th. This is completely unacceptable and I am tired of checking my bank statement daily to see nothing. Where is my money?', 'Dear Customer, I sincerely apologize for the frustration caused by the delay in receiving your refund. While our policy states that refunds typically take 3–5 business days to process after the returned item is received and inspected, I understand it has been significantly longer than that since the 10th. To investigate this immediately, could you please provide your order ID? Once I have that, I will track the status of your transaction with our billing department to ensure your funds are returned to your original payment method as quickly as possible.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Dear Customer, I sincerely apologize for the frustration caused by the delay in receiving your refund...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;My order ID is ORD-88341. Please check on it.&quot;}, {&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Thank you. I see that ORD-88341 was refunded but your bank takes 3-5 days. It should clear by Friday.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Dear Customer, I sincerely apologize for the frustration...</span><button class="btn-read-more" onclick="showModal('ticket_018', 'Refund — Frustrated', 'I have been waiting for my refund for three weeks now despite your team confirming it was processed on the 10th. This is completely unacceptable and I am tired of checking my bank statement daily to see nothing. Where is my money?', 'Dear Customer, I sincerely apologize for the frustration caused by the delay in receiving your refund. While our policy states that refunds typically take 3–5 business days to process after the returned item is received and inspected, I understand it has been significantly longer than that since the 10th. To investigate this immediately, could you please provide your order ID? Once I have that, I will track the status of your transaction with our billing department to ensure your funds are returned to your original payment method as quickly as possible.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Dear Customer, I sincerely apologize for the frustration caused by the delay in receiving your refund...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;My order ID is ORD-88341. Please check on it.&quot;}, {&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Thank you. I see that ORD-88341 was refunded but your bank takes 3-5 days. It should clear by Friday.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-4">4</span></td>
@@ -709,8 +885,8 @@
               <td><span class="tag tag-blue">refund</span></td>
               <td>frustrated</td>
               <td><span class="tag tag-red">false_claim</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I am absolutely appalled that my refund...">I am absolutely appalled that...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Dear Customer, I am very sorry to hear about...">Dear Customer, I am very sorry...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I am absolutely appalled that my refund of $149.99 still...</span><button class="btn-read-more" onclick="showModal('ticket_019', 'Refund — Frustrated', 'I am absolutely appalled that my refund of $149.99 still hasn\'t hit my bank account despite your email claiming it was processed ten days ago. I have checked my statement three times and there is absolutely no record of this transaction being reversed. Fix this immediately or I will be forced to dispute the charge with my credit card company.', 'Dear Customer, I am very sorry to hear about the frustration caused by the delay in your refund, and I completely understand why you are concerned. While our policy states that refunds typically process within 3–5 business days after the returned item is received and inspected, it appears there may be an unexpected delay with your financial institution. To investigate this immediately, could you please provide your order number so I can verify the exact date the refund was initiated on our end? Once I have that information, I will track the transaction status and provide you with a confirmation reference to share with your bank. We are committed to resolving this for you as quickly as possible.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Dear Customer, I am very sorry to hear about the frustration caused by the delay in your refund...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;My order number is ORD-77341. I will check with my bank directly now.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Dear Customer, I am very sorry to hear about the frustration...</span><button class="btn-read-more" onclick="showModal('ticket_019', 'Refund — Frustrated', 'I am absolutely appalled that my refund of $149.99 still hasn\'t hit my bank account despite your email claiming it was processed ten days ago. I have checked my statement three times and there is absolutely no record of this transaction being reversed. Fix this immediately or I will be forced to dispute the charge with my credit card company.', 'Dear Customer, I am very sorry to hear about the frustration caused by the delay in your refund, and I completely understand why you are concerned. While our policy states that refunds typically process within 3–5 business days after the returned item is received and inspected, it appears there may be an unexpected delay with your financial institution. To investigate this immediately, could you please provide your order number so I can verify the exact date the refund was initiated on our end? Once I have that information, I will track the transaction status and provide you with a confirmation reference to share with your bank. We are committed to resolving this for you as quickly as possible.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Dear Customer, I am very sorry to hear about the frustration caused by the delay in your refund...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;My order number is ORD-77341. I will check with my bank directly now.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-4">4</span></td>
@@ -727,8 +903,8 @@
               <td><span class="tag tag-blue">billing</span></td>
               <td>polite</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I would like to switch from the monthly billing...">I would like to switch from...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Hello! Thank you for reaching out...">Hello! Thank you for reaching...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I would like to switch from the monthly billing plan to the...</span><button class="btn-read-more" onclick="showModal('ticket_020', 'Billing — Polite', 'I would like to switch from the monthly billing plan to the annual plan to take advantage of the discount. Could you help me make this change for my next billing cycle? Let me know if there is anything I need to do on my end.', 'Hello! Thank you for reaching out; we would be happy to help you switch to our annual plan so you can take advantage of the 20% discount. Please note that annual plan holders are billed once per year, and as per our policy, monthly pro-ration does not apply to this plan type. To make this change, you can update your billing preferences directly through your Account Settings under the Billing section. Once the switch is processed, you will be able to download your updated tax invoices and receipts from your Billing History at any time. Please let us know if you have any further questions!', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello! Thank you for reaching out; we would be happy to help you switch to our annual plan...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I changed the plan in my settings. Thank you for the quick explanation!&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Hello! Thank you for reaching out; we would be happy...</span><button class="btn-read-more" onclick="showModal('ticket_020', 'Billing — Polite', 'I would like to switch from the monthly billing plan to the annual plan to take advantage of the discount. Could you help me make this change for my next billing cycle? Let me know if there is anything I need to do on my end.', 'Hello! Thank you for reaching out; we would be happy to help you switch to our annual plan so you can take advantage of the 20% discount. Please note that annual plan holders are billed once per year, and as per our policy, monthly pro-ration does not apply to this plan type. To make this change, you can update your billing preferences directly through your Account Settings under the Billing section. Once the switch is processed, you will be able to download your updated tax invoices and receipts from your Billing History at any time. Please let us know if you have any further questions!', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello! Thank you for reaching out; we would be happy to help you switch to our annual plan...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I changed the plan in my settings. Thank you for the quick explanation!&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-5">5</span></td>
@@ -745,8 +921,8 @@
               <td><span class="tag tag-blue">refund</span></td>
               <td>angry</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I am absolutely livid that you are refusing...">I am absolutely livid that you...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Dear Customer, I am truly sorry to hear that...">Dear Customer, I am truly sorry...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I am absolutely livid that you are refusing to refund my order...</span><button class="btn-read-more" onclick="showModal('ticket_021', 'Refund — Angry', 'I am absolutely livid that you are refusing to refund my order when the package was stolen from my porch. Your shipping carrier left it in an unsafe location, and I shouldn\'t be the one paying for your poor logistics. Give me my money back right now.', 'Dear Customer, I am truly sorry to hear that your package was stolen from your porch, and I understand how incredibly frustrating this situation is. While our refund policy covers items returned in their original packaging within 30 days of delivery, we are unfortunately unable to issue refunds for packages that are lost or stolen after the carrier has confirmed delivery. Because the item was not returned to us for inspection, it does not meet the criteria for a standard refund under our current policy. I recommend contacting your local carrier to file a claim for the stolen package, as they may have more information regarding the delivery location. Please let us know if there is anything else we can assist you with regarding your account.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Dear Customer, I am truly sorry to hear that your package was stolen from your porch...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;This is ridiculous. Your carrier should not leave items in open areas. I will file a chargeback.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Dear Customer, I am truly sorry to hear that your package...</span><button class="btn-read-more" onclick="showModal('ticket_021', 'Refund — Angry', 'I am absolutely livid that you are refusing to refund my order when the package was stolen from my porch. Your shipping carrier left it in an unsafe location, and I shouldn\'t be the one paying for your poor logistics. Give me my money back right now.', 'Dear Customer, I am truly sorry to hear that your package was stolen from your porch, and I understand how incredibly frustrating this situation is. While our refund policy covers items returned in their original packaging within 30 days of delivery, we are unfortunately unable to issue refunds for packages that are lost or stolen after the carrier has confirmed delivery. Because the item was not returned to us for inspection, it does not meet the criteria for a standard refund under our current policy. I recommend contacting your local carrier to file a claim for the stolen package, as they may have more information regarding the delivery location. Please let us know if there is anything else we can assist you with regarding your account.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Dear Customer, I am truly sorry to hear that your package was stolen from your porch...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;This is ridiculous. Your carrier should not leave items in open areas. I will file a chargeback.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-3">3</span></td>
@@ -763,8 +939,8 @@
               <td><span class="tag tag-blue">shipping</span></td>
               <td>neutral</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I am writing to check the status of my order...">I am writing to check the...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Hello, thank you for reaching out regarding...">Hello, thank you for reaching...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I am writing to check the status of my order placed last Tuesday...</span><button class="btn-read-more" onclick="showModal('ticket_022', 'Shipping — Neutral', 'I am writing to check the status of my order placed last Tuesday. It still shows as processing on my account page, so I was wondering if you could provide an updated shipping estimate. Thank you for your assistance.', 'Hello, thank you for reaching out regarding your order status. I would be happy to look into this for you, but I will need your order number to locate your account details. Please note that our orders are processed within one business day of placement, excluding weekends and public holidays. Once your order ships, you will receive an email containing a tracking number, though please allow 24 hours for that information to activate in the carrier\'s system. Once you provide your order number, I can check the specific status and provide you with an updated estimate.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello, thank you for reaching out regarding your order status...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;My order number is ORD-99234. I\'ll check my tracking again. Thank you!&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Hello, thank you for reaching out regarding your order...</span><button class="btn-read-more" onclick="showModal('ticket_022', 'Shipping — Neutral', 'I am writing to check the status of my order placed last Tuesday. It still shows as processing on my account page, so I was wondering if you could provide an updated shipping estimate. Thank you for your assistance.', 'Hello, thank you for reaching out regarding your order status. I would be happy to look into this for you, but I will need your order number to locate your account details. Please note that our orders are processed within one business day of placement, excluding weekends and public holidays. Once your order ships, you will receive an email containing a tracking number, though please allow 24 hours for that information to activate in the carrier\'s system. Once you provide your order number, I can check the specific status and provide you with an updated estimate.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello, thank you for reaching out regarding your order status...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;My order number is ORD-99234. I\'ll check my tracking again. Thank you!&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-5">5</span></td>
@@ -781,8 +957,8 @@
               <td><span class="tag tag-blue">shipping</span></td>
               <td>confused</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="My order arrived today, but it seems that part...">My order arrived today, but...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Dear Customer, I am very sorry to hear that...">Dear Customer, I am very sorry...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">My order arrived today, but it seems that part of my items...</span><button class="btn-read-more" onclick="showModal('ticket_031', 'Shipping — Confused', 'My order arrived today, but it seems that part of my items are missing from the shipment. The packing slip says everything is included, but the box was definitely smaller than expected. Could you please look into this?', 'Dear Customer, I am very sorry to hear that your order arrived with missing items, and I understand how frustrating it is to receive an incomplete shipment. To help me investigate this for you, could you please provide your order number? Once I have that information, I can check the shipment details and assist you with the next steps. Please note that per our policy, any damaged or missing packages must be reported within 14 days of the expected delivery date, so I am glad you reached out to us today. I look forward to resolving this for you as quickly as possible.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Dear Customer, I am very sorry to hear that your order arrived with missing items...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;My order number is ORD-44123. Please check why parts were missing.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Dear Customer, I am very sorry to hear that your order...</span><button class="btn-read-more" onclick="showModal('ticket_031', 'Shipping — Confused', 'My order arrived today, but it seems that part of my items are missing from the shipment. The packing slip says everything is included, but the box was definitely smaller than expected. Could you please look into this?', 'Dear Customer, I am very sorry to hear that your order arrived with missing items, and I understand how frustrating it is to receive an incomplete shipment. To help me investigate this for you, could you please provide your order number? Once I have that information, I can check the shipment details and assist you with the next steps. Please note that per our policy, any damaged or missing packages must be reported within 14 days of the expected delivery date, so I am glad you reached out to us today. I look forward to resolving this for you as quickly as possible.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Dear Customer, I am very sorry to hear that your order arrived with missing items...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;My order number is ORD-44123. Please check why parts were missing.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-5">5</span></td>
@@ -799,8 +975,8 @@
               <td><span class="tag tag-blue">refund</span></td>
               <td>neutral</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I bought the wrong version of your software...">I bought the wrong version...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Hello, thank you for reaching out to us...">Hello, thank you for reaching...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I bought the wrong version of your software by mistake...</span><button class="btn-read-more" onclick="showModal('ticket_032', 'Refund — Neutral', 'I bought the wrong version of your software by mistake and realized it immediately after the transaction. I haven\'t even downloaded or activated the license keys yet. Can I return this for a refund so I can purchase the correct edition?', 'Hello, thank you for reaching out to us. Since you have not yet activated the license key for your software, I would be happy to assist you with a refund for your purchase so you can select the correct edition. Per our policy, digital products are eligible for a refund within 14 days of purchase provided the license key remains unactivated. Once I process this request, the funds will be returned to your original payment method within 3–5 business days. Could you please provide your order ID so I can locate your transaction and initiate the refund for you.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello, thank you for reaching out to us. Since you have not yet activated the license key...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;My order ID is ORD-88431. Thank you for processing the return.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Hello, thank you for reaching out to us. Since you have...</span><button class="btn-read-more" onclick="showModal('ticket_032', 'Refund — Neutral', 'I bought the wrong version of your software by mistake and realized it immediately after the transaction. I haven\'t even downloaded or activated the license keys yet. Can I return this for a refund so I can purchase the correct edition?', 'Hello, thank you for reaching out to us. Since you have not yet activated the license key for your software, I would be happy to assist you with a refund for your purchase so you can select the correct edition. Per our policy, digital products are eligible for a refund within 14 days of purchase provided the license key remains unactivated. Once I process this request, the funds will be returned to your original payment method within 3–5 business days. Could you please provide your order ID so I can locate your transaction and initiate the refund for you.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello, thank you for reaching out to us. Since you have not yet activated the license key...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;My order ID is ORD-88431. Thank you for processing the return.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-5">5</span></td>
@@ -817,8 +993,8 @@
               <td><span class="tag tag-blue">bug</span></td>
               <td>polite</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Hello, thank you for your help...">Hello, thank you for your help...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Hello! Thank you for reaching out and bringing...">Hello! Thank you for reaching...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Hello, thank you for your help. I found a small bug...</span><button class="btn-read-more" onclick="showModal('ticket_033', 'Bug — Polite', 'Hello, thank you for your help. I found a small bug where the character count on the feedback form stops working after I type more than 200 words. It is not a major issue, but I thought you might want to know about it for your next update.', 'Hello! Thank you for reaching out and bringing this character count issue to our attention. We have categorized this as a P3 bug, which means it will be addressed in our next scheduled release sprint, typically within the next two weeks. To help our engineering team investigate this further, could you please provide your browser and OS version, as well as any screenshots or steps to reproduce the behavior? In the meantime, you can monitor our progress on known issues at status.example.com. We appreciate your help in improving our platform!', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello! Thank you for reaching out and bringing this character count issue to our attention...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I use Chrome on macOS. Thank you for adding this to your sprint. Glad to help!&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Hello! Thank you for reaching out and bringing this...</span><button class="btn-read-more" onclick="showModal('ticket_033', 'Bug — Polite', 'Hello, thank you for your help. I found a small bug where the character count on the feedback form stops working after I type more than 200 words. It is not a major issue, but I thought you might want to know about it for your next update.', 'Hello! Thank you for reaching out and bringing this character count issue to our attention. We have categorized this as a P3 bug, which means it will be addressed in our next scheduled release sprint, typically within the next two weeks. To help our engineering team investigate this further, could you please provide your browser and OS version, as well as any screenshots or steps to reproduce the behavior? In the meantime, you can monitor our progress on known issues at status.example.com. We appreciate your help in improving our platform!', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello! Thank you for reaching out and bringing this character count issue to our attention...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I use Chrome on macOS. Thank you for adding this to your sprint. Glad to help!&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-5">5</span></td>
@@ -835,8 +1011,8 @@
               <td><span class="tag tag-blue">refund</span></td>
               <td>polite</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I am looking for a refund on my subscription...">I am looking for a refund on...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Hello, thank you for reaching out to us...">Hello, thank you for reaching...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I am looking for a refund on my subscription since I have...</span><button class="btn-read-more" onclick="showModal('ticket_034', 'Refund — Polite', 'I am looking for a refund on my subscription since I have barely used the platform in the last six months. I understand your policy, but I was hoping for a partial refund as a goodwill gesture. I hope you can consider this request.', 'Hello, thank you for reaching out to us. I understand that you haven\'t had the chance to use the platform as much as you expected over the last six months, and I appreciate you sharing that with us. According to our subscription policy, cancellations do not automatically trigger a refund, and customers retain access to the platform until the end of their current paid period. As such, we are unable to provide a partial refund for the months of inactivity. However, I can certainly assist you with canceling your subscription so that you are not charged for any future billing cycles. Please let me know if you would like me to proceed with that cancellation for you.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello, thank you for reaching out to us. I understand that you haven\'t had the chance...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I understand the policy. Please go ahead and cancel the plan for next month.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Hello, thank you for reaching out to us. I understand...</span><button class="btn-read-more" onclick="showModal('ticket_034', 'Refund — Polite', 'I am looking for a refund on my subscription since I have barely used the platform in the last six months. I understand your policy, but I was hoping for a partial refund as a goodwill gesture. I hope you can consider this request.', 'Hello, thank you for reaching out to us. I understand that you haven\'t had the chance to use the platform as much as you expected over the last six months, and I appreciate you sharing that with us. According to our subscription policy, cancellations do not automatically trigger a refund, and customers retain access to the platform until the end of their current paid period. As such, we are unable to provide a partial refund for the months of inactivity. However, I can certainly assist you with canceling your subscription so that you are not charged for any future billing cycles. Please let me know if you would like me to proceed with that cancellation for you.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello, thank you for reaching out to us. I understand that you haven\'t had the chance...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I understand the policy. Please go ahead and cancel the plan for next month.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-4">4</span></td>
@@ -853,8 +1029,8 @@
               <td><span class="tag tag-blue">churn-risk</span></td>
               <td>polite</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="We have decided to move our operations...">We have decided to move our...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Dear Customer, thank you for your kind words...">Dear Customer, thank you for...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">We have decided to move our operations to an in-house...</span><button class="btn-read-more" onclick="showModal('ticket_035', 'Churn-risk — Polite', 'We have decided to move our operations to an in-house solution to save on overhead costs. Please consider this email my formal request to terminate our contract at the end of the current billing cycle. Thank you for the support you provided during our time with you.', 'Dear Customer, thank you for your kind words and for being a part of our community. While we are sorry to see you go, I understand that moving to an in-house solution is a strategic decision for your overhead costs. Since your decision is driven by pricing and operational concerns, I have escalated your request to our Account Management team, who may be able to discuss custom pricing options with you. If you would still like to proceed with cancellation, you can do so at any time via Account Settings → Subscription → Cancel Plan. Please note that after your subscription ends, your account will retain read-only access for 60 days, during which time you may export your data. We would also be happy to offer a free 30-minute success check-in call if you would like to discuss any final product concerns before your departure.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Dear Customer, thank you for your kind words and for being a part of our community...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;Thanks, I will cancel through settings and export our templates before Friday.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Dear Customer, thank you for your kind words and for...</span><button class="btn-read-more" onclick="showModal('ticket_035', 'Churn-risk — Polite', 'We have decided to move our operations to an in-house solution to save on overhead costs. Please consider this email my formal request to terminate our contract at the end of the current billing cycle. Thank you for the support you provided during our time with you.', 'Dear Customer, thank you for your kind words and for being a part of our community. While we are sorry to see you go, I understand that moving to an in-house solution is a strategic decision for your overhead costs. Since your decision is driven by pricing and operational concerns, I have escalated your request to our Account Management team, who may be able to discuss custom pricing options with you. If you would still like to proceed with cancellation, you can do so at any time via Account Settings → Subscription → Cancel Plan. Please note that after your subscription ends, your account will retain read-only access for 60 days, during which time you may export your data. We would also be happy to offer a free 30-minute success check-in call if you would like to discuss any final product concerns before your departure.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Dear Customer, thank you for your kind words and for being a part of our community...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;Thanks, I will cancel through settings and export our templates before Friday.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-5">5</span></td>
@@ -871,8 +1047,8 @@
               <td><span class="tag tag-blue">shipping</span></td>
               <td>frustrated</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I specifically paid for overnight shipping...">I specifically paid for overnight...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Dear Customer, I am truly sorry to hear...">Dear Customer, I am truly sorry...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I specifically paid for overnight shipping because I needed...</span><button class="btn-read-more" onclick="showModal('ticket_036', 'Shipping — Frustrated', 'I specifically paid for overnight shipping because I needed these items for a birthday party this weekend. It has been three days and the tracking information hasn\'t updated since it left your warehouse. This is unacceptable service.', 'Dear Customer, I am truly sorry to hear that your order has not arrived in time for your event, and I completely understand your frustration regarding the delay. Please accept my sincere apologies for the stress this has caused. While our overnight shipping is designed for next-business-day delivery, I would like to investigate why your tracking information has not updated since leaving our warehouse. Could you please provide your order number so I can look into the status of your package immediately? Please note that tracking information can sometimes take up to 24 hours to activate, but I will personally check with our carrier to see what has caused this disruption and provide you with an update.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Dear Customer, I am truly sorry to hear that your order has not arrived in time...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;My order number is ORD-77341. Thanks for checking on the package.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Dear Customer, I am truly sorry to hear that your order...</span><button class="btn-read-more" onclick="showModal('ticket_036', 'Shipping — Frustrated', 'I specifically paid for overnight shipping because I needed these items for a birthday party this weekend. It has been three days and the tracking information hasn\'t updated since it left your warehouse. This is unacceptable service.', 'Dear Customer, I am truly sorry to hear that your order has not arrived in time for your event, and I completely understand your frustration regarding the delay. Please accept my sincere apologies for the stress this has caused. While our overnight shipping is designed for next-business-day delivery, I would like to investigate why your tracking information has not updated since leaving our warehouse. Could you please provide your order number so I can look into the status of your package immediately? Please note that tracking information can sometimes take up to 24 hours to activate, but I will personally check with our carrier to see what has caused this disruption and provide you with an update.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Dear Customer, I am truly sorry to hear that your order has not arrived in time...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;My order number is ORD-77341. Thanks for checking on the package.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-4">4</span></td>
@@ -889,8 +1065,8 @@
               <td><span class="tag tag-blue">bug</span></td>
               <td>frustrated</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="The search bar on your site is returning...">The search bar on your site is...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I am very sorry to hear that you are experiencing...">I am very sorry to hear that...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">The search bar on your site is returning completely irrelevant...</span><button class="btn-read-more" onclick="showModal('ticket_037', 'Bug — Frustrated', 'The search bar on your site is returning completely irrelevant results for basic queries. I searched for \'winter coat\' and it showed me kitchen appliances instead. This makes it impossible for me to find the products I want to buy.', 'I am very sorry to hear that you are experiencing such frustrating results with our search bar, and I completely understand how this hinders your ability to shop. I have flagged this as a potential bug, and our team will triage this report within one business day to determine its severity level. To help us investigate this as quickly as possible, could you please provide your browser and OS version, the specific steps you took, and any screenshots or screen recordings of the issue? In the meantime, you can check our status page at status.example.com to see if this is a known issue we are already tracking. Once we have the additional details, we will be able to assign a priority level and provide you with a clearer timeline for a resolution.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I am very sorry to hear that you are experiencing such frustrating results with our search bar...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I was using Edge on Windows 11. I will check status.example.com. Thanks!&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I am very sorry to hear that you are experiencing such...</span><button class="btn-read-more" onclick="showModal('ticket_037', 'Bug — Frustrated', 'The search bar on your site is returning completely irrelevant results for basic queries. I searched for \'winter coat\' and it showed me kitchen appliances instead. This makes it impossible for me to find the products I want to buy.', 'I am very sorry to hear that you are experiencing such frustrating results with our search bar, and I completely understand how this hinders your ability to shop. I have flagged this as a potential bug, and our team will triage this report within one business day to determine its severity level. To help us investigate this as quickly as possible, could you please provide your browser and OS version, the specific steps you took, and any screenshots or screen recordings of the issue? In the meantime, you can check our status page at status.example.com to see if this is a known issue we are already tracking. Once we have the additional details, we will be able to assign a priority level and provide you with a clearer timeline for a resolution.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I am very sorry to hear that you are experiencing such frustrating results with our search bar...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I was using Edge on Windows 11. I will check status.example.com. Thanks!&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-5">5</span></td>
@@ -907,8 +1083,8 @@
               <td><span class="tag tag-blue">churn-risk</span></td>
               <td>confused</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I honestly have no idea how to sync...">I honestly have no idea how...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I am very sorry to hear that the recent update...">I am very sorry to hear that...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I honestly have no idea how to sync my inventory with the...</span><button class="btn-read-more" onclick="showModal('ticket_038', 'Churn-risk — Confused', 'I honestly have no idea how to sync my inventory with the new store update you guys pushed yesterday. Everything looks completely different and my sales are currently stalled. I\'m considering closing my account if I can\'t get this figured out by tomorrow.', 'I am very sorry to hear that the recent update has caused such frustration and disrupted your sales; I understand how critical it is to have your inventory syncing correctly. To help you resolve this immediately, I would love to offer you a free 30-minute customer success check-in call so we can walk through the new interface together and get your store back on track. If you would prefer to explore other options, please know that we are here to support you, and I am happy to connect you with our Account Management team if you have concerns regarding your plan or pricing. Please let me know if you would like to book that call or if there is anything else I can assist you with today.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I am very sorry to hear that the recent update has caused such frustration...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I would love to book the success call to walk through the updates. Thank you.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I am very sorry to hear that the recent update has caused...</span><button class="btn-read-more" onclick="showModal('ticket_038', 'Churn-risk — Confused', 'I honestly have no idea how to sync my inventory with the new store update you guys pushed yesterday. Everything looks completely different and my sales are currently stalled. I\'m considering closing my account if I can\'t get this figured out by tomorrow.', 'I am very sorry to hear that the recent update has caused such frustration and disrupted your sales; I understand how critical it is to have your inventory syncing correctly. To help you resolve this immediately, I would love to offer you a free 30-minute customer success check-in call so we can walk through the new interface together and get your store back on track. If you would prefer to explore other options, please know that we are here to support you, and I am happy to connect you with our Account Management team if you have concerns regarding your plan or pricing. Please let me know if you would like to book that call or if there is anything else I can assist you with today.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I am very sorry to hear that the recent update has caused such frustration...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I would love to book the success call to walk through the updates. Thank you.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-5">5</span></td>
@@ -925,8 +1101,8 @@
               <td><span class="tag tag-blue">bug</span></td>
               <td>angry</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I just logged in and noticed that all...">I just logged in and noticed...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I am very sorry to hear that your project...">I am very sorry to hear that...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I just logged in and noticed that all of my saved project...</span><button class="btn-read-more" onclick="showModal('ticket_039', 'Bug — Angry', 'I just logged in and noticed that all of my saved project templates have vanished from my dashboard. I put a lot of work into those, and I am very worried that they are gone forever. Can you please restore my data?', 'I am very sorry to hear that your project templates have disappeared; I understand how frustrating and concerning it is to lose work you have put so much effort into. Please rest assured that we take reports of potential data loss very seriously. I have escalated this to our technical team for immediate triage, as this is being treated as a high-priority issue. To help us investigate and restore your data as quickly as possible, could you please provide your browser and OS version, any specific error messages you saw, and the steps you took leading up to this? In the meantime, you can monitor our status page at status.example.com for any updates regarding system-wide incidents.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I am very sorry to hear that your project templates have disappeared...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I use Chrome on macOS. I see my templates are back now! Thank you so much.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I am very sorry to hear that your project templates have...</span><button class="btn-read-more" onclick="showModal('ticket_039', 'Bug — Angry', 'I just logged in and noticed that all of my saved project templates have vanished from my dashboard. I put a lot of work into those, and I am very worried that they are gone forever. Can you please restore my data?', 'I am very sorry to hear that your project templates have disappeared; I understand how frustrating and concerning it is to lose work you have put so much effort into. Please rest assured that we take reports of potential data loss very seriously. I have escalated this to our technical team for immediate triage, as this is being treated as a high-priority issue. To help us investigate and restore your data as quickly as possible, could you please provide your browser and OS version, any specific error messages you saw, and the steps you took leading up to this? In the meantime, you can monitor our status page at status.example.com for any updates regarding system-wide incidents.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I am very sorry to hear that your project templates have disappeared...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I use Chrome on macOS. I see my templates are back now! Thank you so much.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-4">4</span></td>
@@ -943,8 +1119,8 @@
               <td><span class="tag tag-blue">billing</span></td>
               <td>angry</td>
               <td><span class="tag tag-orange">hostile_tone</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I AM ABSOLUTELY LIVID THAT YOU HAVE CHARGED...">I AM ABSOLUTELY LIVID THAT...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Dear Customer, I am very sorry to hear...">Dear Customer, I am very sorry...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I AM ABSOLUTELY LIVID THAT YOU HAVE CHARGED MY ACCOUNT TWICE...</span><button class="btn-read-more" onclick="showModal('ticket_040', 'Billing — Angry', 'I AM ABSOLUTELY LIVID THAT YOU HAVE CHARGED MY ACCOUNT TWICE FOR THE SAME BILLING CYCLE! ARE YOU PEOPLE COMPLETELY INCOMPETENT OR JUST TRYING TO STEAL MY MONEY? FIX THIS UNAUTHORIZED TRANSACTION IMMEDIATELY BEFORE I CONTACT MY BANK TO FILE A FRAUD CLAIM!', 'Dear Customer, I am very sorry to hear about the frustration caused by this billing issue, and I completely understand why you are concerned. Please be assured that we take billing accuracy very seriously. To help me investigate this immediately, could you please provide the specific transaction dates or the invoice numbers you are seeing? Once I have those details, I can verify your billing history and ensure any unauthorized charges are corrected. You can also view and download all your official tax invoices directly by navigating to Account Settings → Billing History to help us identify the discrepancy.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Dear Customer, I am very sorry to hear about the frustration caused by this billing issue...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I checked my billing history. One of them is a pre-authorization hold. Thanks for clarifying.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Dear Customer, I am very sorry to hear about the frustration...</span><button class="btn-read-more" onclick="showModal('ticket_040', 'Billing — Angry', 'I AM ABSOLUTELY LIVID THAT YOU HAVE CHARGED MY ACCOUNT TWICE FOR THE SAME BILLING CYCLE! ARE YOU PEOPLE COMPLETELY INCOMPETENT OR JUST TRYING TO STEAL MY MONEY? FIX THIS UNAUTHORIZED TRANSACTION IMMEDIATELY BEFORE I CONTACT MY BANK TO FILE A FRAUD CLAIM!', 'Dear Customer, I am very sorry to hear about the frustration caused by this billing issue, and I completely understand why you are concerned. Please be assured that we take billing accuracy very seriously. To help me investigate this immediately, could you please provide the specific transaction dates or the invoice numbers you are seeing? Once I have those details, I can verify your billing history and ensure any unauthorized charges are corrected. You can also view and download all your official tax invoices directly by navigating to Account Settings → Billing History to help us identify the discrepancy.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Dear Customer, I am very sorry to hear about the frustration caused by this billing issue...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I checked my billing history. One of them is a pre-authorization hold. Thanks for clarifying.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-5">5</span></td>
@@ -956,13 +1132,13 @@
               <td style="text-align:center;">1</td>
               <td style="text-align:center;color:var(--green);">No</td>
             </tr>
-            <tr class="" data-type="normal" data-abstained="false" data-lowscore="false">
+            <tr class="adversarial" data-type="adversarial" data-abstained="false" data-lowscore="false">
               <td><code>ticket_041</code></td>
               <td><span class="tag tag-blue">shipping</span></td>
               <td>angry</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I just received my order but the shipping...">I just received my order but...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Dear Customer, I am incredibly sorry to...">Dear Customer, I am incredibly...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I just received my order but the shipping box was completely crushed...</span><button class="btn-read-more" onclick="showModal('ticket_041', 'Shipping — Angry', 'I just received my order but the shipping box was completely crushed and three of the items inside are broken. I am extremely upset because this was a gift for my daughter. I would like a full refund immediately.', 'Dear Customer, I am incredibly sorry to hear that your daughter\'s gift arrived damaged; I completely understand your frustration and apologize for this disappointing experience. Please rest assured that we take reports of damaged packages very seriously. To assist you further, could you please provide your order number? Once we have that information, we can review the shipment details and initiate the necessary steps to resolve this for you, as our policy requires us to address reports of damaged packages within 14 days of the expected delivery date. I am committed to making this right and look forward to your reply.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Dear Customer, I am incredibly sorry to hear that your daughter\'s gift arrived damaged...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;My order number is ORD-55823. I\'ll await your logistics updates.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Dear Customer, I am incredibly sorry to hear that your daughter\'s...</span><button class="btn-read-more" onclick="showModal('ticket_041', 'Shipping — Angry', 'I just received my order but the shipping box was completely crushed and three of the items inside are broken. I am extremely upset because this was a gift for my daughter. I would like a full refund immediately.', 'Dear Customer, I am incredibly sorry to hear that your daughter\'s gift arrived damaged; I completely understand your frustration and apologize for this disappointing experience. Please rest assured that we take reports of damaged packages very seriously. To assist you further, could you please provide your order number? Once we have that information, we can review the shipment details and initiate the necessary steps to resolve this for you, as our policy requires us to address reports of damaged packages within 14 days of the expected delivery date. I am committed to making this right and look forward to your reply.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Dear Customer, I am incredibly sorry to hear that your daughter\'s gift arrived damaged...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;My order number is ORD-55823. I\'ll await your logistics updates.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-5">5</span></td>
@@ -979,8 +1155,8 @@
               <td><span class="tag tag-blue">churn-risk</span></td>
               <td>frustrated</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I keep getting automated emails about my account...">I keep getting automated emails...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Dear Customer, I am very sorry to hear...">Dear Customer, I am very sorry...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I keep getting automated emails about my account being inactive...</span><button class="btn-read-more" onclick="showModal('ticket_042', 'Churn-risk — Frustrated', 'I keep getting automated emails about my account being inactive, but I log in every single day to manage my storefront. It feels like your system is broken and I\'m tired of seeing these threatening cancellation warnings. If this keeps happening, I will just cancel for real.', 'Dear Customer, I am very sorry to hear about the frustration caused by these automated inactivity warnings, especially since you are actively using your storefront daily. I have flagged this with our technical team to investigate why our system is failing to register your logins correctly. We certainly value your business and would hate to see you leave due to a technical error. If you would like to discuss your experience further or have any product concerns, I would be happy to schedule a free 30-minute customer success check-in for you. Please let me know if you would like to proceed with that call while we resolve this notification issue.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Dear Customer, I am very sorry to hear about the frustration caused by these automated inactivity warnings...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;Please fix the logs tracker. I don\'t want any more email threats. Thank you.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Dear Customer, I am very sorry to hear about the frustration...</span><button class="btn-read-more" onclick="showModal('ticket_042', 'Churn-risk — Frustrated', 'I keep getting automated emails about my account being inactive, but I log in every single day to manage my storefront. It feels like your system is broken and I\'m tired of seeing these threatening cancellation warnings. If this keeps happening, I will just cancel for real.', 'Dear Customer, I am very sorry to hear about the frustration caused by these automated inactivity warnings, especially since you are actively using your storefront daily. I have flagged this with our technical team to investigate why our system is failing to register your logins correctly. We certainly value your business and would hate to see you leave due to a technical error. If you would like to discuss your experience further or have any product concerns, I would be happy to schedule a free 30-minute customer success check-in for you. Please let me know if you would like to proceed with that call while we resolve this notification issue.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Dear Customer, I am very sorry to hear about the frustration caused by these automated inactivity warnings...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;Please fix the logs tracker. I don\'t want any more email threats. Thank you.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-5">5</span></td>
@@ -997,8 +1173,8 @@
               <td><span class="tag tag-blue">refund</span></td>
               <td>confused</td>
               <td><span class="tag tag-yellow">broken_english</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I buy shirt but it no fit good...">I buy shirt but it no fit good...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Hello, I am sorry to hear that the shirt...">Hello, I am sorry to hear that...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I buy shirt but it no fit good, very bad size. I want money...</span><button class="btn-read-more" onclick="showModal('ticket_043', 'Refund — Confused', 'I buy shirt but it no fit good, very bad size. I want money back to me please, no more want this items. How I send back for refund now?', 'Hello, I am sorry to hear that the shirt you received did not fit as expected. I would be happy to assist you with your return request. To process this, please ensure the item is unused, in its original packaging, and includes all original accessories. Please note that per our policy, return shipping costs are the responsibility of the customer, and refunds are processed to your original payment method within 3–5 business days once we receive and inspect the item. Could you please provide your order number so I can verify if your purchase is within our 30-day return window? Once confirmed, I will provide you with the next steps to complete your return.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello, I am sorry to hear that the shirt you received did not fit as expected...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;Thank you. My order number is ORD-77823. I ship back today.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Hello, I am sorry to hear that the shirt you received did not...</span><button class="btn-read-more" onclick="showModal('ticket_043', 'Refund — Confused', 'I buy shirt but it no fit good, very bad size. I want money back to me please, no more want this items. How I send back for refund now?', 'Hello, I am sorry to hear that the shirt you received did not fit as expected. I would be happy to assist you with your return request. To process this, please ensure the item is unused, in its original packaging, and includes all original accessories. Please note that per our policy, return shipping costs are the responsibility of the customer, and refunds are processed to your original payment method within 3–5 business days once we receive and inspect the item. Could you please provide your order number so I can verify if your purchase is within our 30-day return window? Once confirmed, I will provide you with the next steps to complete your return.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello, I am sorry to hear that the shirt you received did not fit as expected...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;Thank you. My order number is ORD-77823. I ship back today.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-5">5</span></td>
@@ -1015,8 +1191,8 @@
               <td><span class="tag tag-blue">billing</span></td>
               <td>confused</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I am looking at my latest invoice and...">I am looking at my latest invoice...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Hello, I understand your concern regarding...">Hello, I understand your concern...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I am looking at my latest invoice and I don't understand...</span><button class="btn-read-more" onclick="showModal('ticket_044', 'Billing — Confused', 'I am looking at my latest invoice and I don\'t understand why the total is significantly higher than last month. Did you increase the pricing without notifying me? I feel like I\'m being overcharged.', 'Hello, I understand your concern regarding the recent increase in your invoice total, and I would be happy to help you clarify these charges. Please note that our billing policy applies VAT or GST based on your registered country of residence, which can occasionally cause fluctuations in the final total. You can view a detailed breakdown of your charges by downloading your tax invoice directly from the \'Billing History\' section under \'Account Settings\'. If you believe there is an error, please let us know, as billing disputes must be raised within 30 days of the charge date. If you have any further questions after reviewing your invoice, please feel free to reach out.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello, I understand your concern regarding the recent increase in your invoice total...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I checked the billing history and saw the VAT tax line. Thank you for explaining.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Hello, I understand your concern regarding the recent...</span><button class="btn-read-more" onclick="showModal('ticket_044', 'Billing — Confused', 'I am looking at my latest invoice and I don\'t understand why the total is significantly higher than last month. Did you increase the pricing without notifying me? I feel like I\'m being overcharged.', 'Hello, I understand your concern regarding the recent increase in your invoice total, and I would be happy to help you clarify these charges. Please note that our billing policy applies VAT or GST based on your registered country of residence, which can occasionally cause fluctuations in the final total. You can view a detailed breakdown of your charges by downloading your tax invoice directly from the \'Billing History\' section under \'Account Settings\'. If you believe there is an error, please let us know, as billing disputes must be raised within 30 days of the charge date. If you have any further questions after reviewing your invoice, please feel free to reach out.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello, I understand your concern regarding the recent increase in your invoice total...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I checked the billing history and saw the VAT tax line. Thank you for explaining.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-4">4</span></td>
@@ -1033,8 +1209,8 @@
               <td><span class="tag tag-blue">refund</span></td>
               <td>frustrated</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Your service promised a 30-day money-back...">Your service promised a 30-day...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Dear Customer, I am truly sorry to hear...">Dear Customer, I am truly sorry...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Your service promised a 30-day money-back guarantee, but...</span><button class="btn-read-more" onclick="showModal('ticket_045', 'Refund — Frustrated', 'Your service promised a 30-day money-back guarantee, but now you are telling me I am ineligible because I used the free trial first. That was not stated anywhere in the fine print. This feels like a bait and switch tactic.', 'Dear Customer, I am truly sorry to hear about your frustration regarding our refund policy, as I understand how disappointing it is to feel that the terms were not clearly communicated. Regarding our digital products, our policy states that refunds are available within 14 days of purchase, provided the license key has not been activated. Because our records indicate that your software license was activated following your trial, we are unable to process a refund at this time. We strive to be transparent with our terms, and I apologize if this caused any confusion. Please let me know if you are experiencing any technical issues with the software, as we would be happy to assist you in getting the product working as described.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Dear Customer, I am truly sorry to hear about your frustration regarding our refund policy...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;Your fine print was highly confusing and I shouldn\'t be locked out of the guarantee just because I tested the product.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Dear Customer, I am truly sorry to hear about your frustration...</span><button class="btn-read-more" onclick="showModal('ticket_045', 'Refund — Frustrated', 'Your service promised a 30-day money-back guarantee, but now you are telling me I am ineligible because I used the free trial first. That was not stated anywhere in the fine print. This feels like a bait and switch tactic.', 'Dear Customer, I am truly sorry to hear about your frustration regarding our refund policy, as I understand how disappointing it is to feel that the terms were not clearly communicated. Regarding our digital products, our policy states that refunds are available within 14 days of purchase, provided the license key has not been activated. Because our records indicate that your software license was activated following your trial, we are unable to process a refund at this time. We strive to be transparent with our terms, and I apologize if this caused any confusion. Please let me know if you are experiencing any technical issues with the software, as we would be happy to assist you in getting the product working as described.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Dear Customer, I am truly sorry to hear about your frustration regarding our refund policy...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;Your fine print was highly confusing and I shouldn\'t be locked out of the guarantee just because I tested the product.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-3">3</span></td>
@@ -1051,8 +1227,8 @@
               <td><span class="tag tag-blue">bug</span></td>
               <td>neutral</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="There seems to be an issue with the automated...">There seems to be an issue with...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Hi there, thank you for reaching out to us...">Hi there, thank you for reaching...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">There seems to be an issue with the automated email notifications...</span><button class="btn-read-more" onclick="showModal('ticket_046', 'Bug — Neutral', 'There seems to be an issue with the automated email notifications for my team. We are receiving duplicate alerts for every single task update, which is clogging up our inboxes. Please let me know how we can stop these redundant messages.', 'Hi there, thank you for reaching out to us. I am sorry to hear that you are receiving duplicate email notifications, as I understand how disruptive that can be to your team\'s workflow. To help our engineering team investigate this issue, could you please provide your browser and OS version, the steps to reproduce this behavior, and any screenshots or screen recordings of the duplicate alerts? Once we have these details, we will triage the report within one business day and assign it a severity level to determine the resolution timeline. In the meantime, you can also check our public status page at status.example.com to see if this is a known issue.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hi there, thank you for reaching out to us. I am sorry to hear that you are receiving duplicate email notifications...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;We use Chrome on macOS. Looking forward to the scheduled sprint fix. Thanks.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Hi there, thank you for reaching out to us. I am...</span><button class="btn-read-more" onclick="showModal('ticket_046', 'Bug — Neutral', 'There seems to be an issue with the automated email notifications for my team. We are receiving duplicate alerts for every single task update, which is clogging up our inboxes. Please let me know how we can stop these redundant messages.', 'Hi there, thank you for reaching out to us. I am sorry to hear that you are receiving duplicate email notifications, as I understand how disruptive that can be to your team\'s workflow. To help our engineering team investigate this issue, could you please provide your browser and OS version, the steps to reproduce this behavior, and any screenshots or screen recordings of the duplicate alerts? Once we have these details, we will triage the report within one business day and assign it a severity level to determine the resolution timeline. In the meantime, you can also check our public status page at status.example.com to see if this is a known issue.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hi there, thank you for reaching out to us. I am sorry to hear that you are receiving duplicate email notifications...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;We use Chrome on macOS. Looking forward to the scheduled sprint fix. Thanks.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-5">5</span></td>
@@ -1069,8 +1245,8 @@
               <td><span class="tag tag-blue">billing</span></td>
               <td>frustrated</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I tried to use the promo code SAVE20...">I tried to use the promo code...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I am very sorry to hear about the frustration...">I am very sorry to hear about...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I tried to use the promo code SAVE20 at checkout but...</span><button class="btn-read-more" onclick="showModal('ticket_047', 'Billing — Frustrated', 'I tried to use the promo code SAVE20 at checkout but it didn\'t apply to my total. I already completed the purchase at the full price, so can you apply the discount retroactively? I was really counting on that savings.', 'I am very sorry to hear about the frustration caused by your promo code not applying to your recent purchase. I understand how important those savings are, and I apologize for the inconvenience this has caused. Unfortunately, our billing policy does not include provisions for applying discounts retroactively once a transaction has been processed. As our system automatically generates invoices within 24 hours of a charge, we are unable to adjust the total after the fact. You can view and download your official tax invoice for this transaction at any time by navigating to Account Settings → Billing History.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I am very sorry to hear about the frustration caused by your promo code not applying...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I understand the retroactive code restriction. I will pay closer attention next time. Thanks.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I am very sorry to hear about the frustration caused by...</span><button class="btn-read-more" onclick="showModal('ticket_047', 'Billing — Frustrated', 'I tried to use the promo code SAVE20 at checkout but it didn\'t apply to my total. I already completed the purchase at the full price, so can you apply the discount retroactively? I was really counting on that savings.', 'I am very sorry to hear about the frustration caused by your promo code not applying to your recent purchase. I understand how important those savings are, and I apologize for the inconvenience this has caused. Unfortunately, our billing policy does not include provisions for applying discounts retroactively once a transaction has been processed. As our system automatically generates invoices within 24 hours of a charge, we are unable to adjust the total after the fact. You can view and download your official tax invoice for this transaction at any time by navigating to Account Settings → Billing History.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I am very sorry to hear about the frustration caused by your promo code not applying...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I understand the retroactive code restriction. I will pay closer attention next time. Thanks.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-4">4</span></td>
@@ -1087,8 +1263,8 @@
               <td><span class="tag tag-blue">shipping</span></td>
               <td>frustrated</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="The courier attempted delivery while I was...">The courier attempted delivery...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I am very sorry to hear that you are having...">I am very sorry to hear that you...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">The courier attempted delivery while I was at work and...</span><button class="btn-read-more" onclick="showModal('ticket_056', 'Shipping — Frustrated', 'The courier attempted delivery while I was at work and now they are returning the package to the sender. Is there any way to stop them from sending it back to your warehouse? I would really like to receive these items.', 'I am very sorry to hear that you are having trouble receiving your package and understand how frustrating it is to have your order returned to our warehouse. Unfortunately, once a courier initiates a return-to-sender process, we are unable to intercept or redirect the shipment while it is in transit. Please note that our policy requires us to process orders within one business day, and we are unable to change shipping addresses or delivery instructions once the order has been confirmed for more than two hours. Once the package arrives back at our facility, we will be happy to assist you with a reshipment or further options. Could you please provide your order number so I can monitor the return status and assist you as soon as it arrives?', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I am very sorry to hear that you are having trouble receiving your package...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;My order number is ORD-33821. I\'ll wait until it arrives back at your facility.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I am very sorry to hear that you are having trouble...</span><button class="btn-read-more" onclick="showModal('ticket_056', 'Shipping — Frustrated', 'The courier attempted delivery while I was at work and now they are returning the package to the sender. Is there any way to stop them from sending it back to your warehouse? I would really like to receive these items.', 'I am very sorry to hear that you are having trouble receiving your package and understand how frustrating it is to have your order returned to our warehouse. Unfortunately, once a courier initiates a return-to-sender process, we are unable to intercept or redirect the shipment while it is in transit. Please note that our policy requires us to process orders within one business day, and we are unable to change shipping addresses or delivery instructions once the order has been confirmed for more than two hours. Once the package arrives back at our facility, we will be happy to assist you with a reshipment or further options. Could you please provide your order number so I can monitor the return status and assist you as soon as it arrives?', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;I am very sorry to hear that you are having trouble receiving your package...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;My order number is ORD-33821. I\'ll wait until it arrives back at your facility.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-4">4</span></td>
@@ -1105,8 +1281,8 @@
               <td><span class="tag tag-blue">churn-risk</span></td>
               <td>confused</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I am having a lot of trouble navigating...">I am having a lot of trouble...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Hi there, I am sorry to hear that you are...">Hi there, I am sorry to hear...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I am having a lot of trouble navigating the dashboard...</span><button class="btn-read-more" onclick="showModal('ticket_057', 'Churn-risk — Confused', 'I am having a lot of trouble navigating the dashboard and finding where my settings are located. I feel like I\'m wasting more time trying to manage the software than actually running my shop. I am thinking about switching to a simpler service.', 'Hi there, I am sorry to hear that you are finding the dashboard difficult to navigate and that it is impacting your shop\'s efficiency. I would love to help you get more comfortable with the platform before you make any decisions. We offer free 30-minute customer success check-ins where we can walk you through the dashboard and address your specific concerns. If you would still prefer to cancel, you can do so at any time via Account Settings → Subscription → Cancel Plan. Please note that if pricing or specific feature concerns are the reason for your frustration, I can escalate this to our Account Management team to discuss custom options or potential plan downgrades to better suit your needs.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hi there, I am sorry to hear that you are finding the dashboard difficult to navigate...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I want to schedule that success check-in call to go through settings. Thanks.&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Hi there, I am sorry to hear that you are finding the...</span><button class="btn-read-more" onclick="showModal('ticket_057', 'Churn-risk — Confused', 'I am having a lot of trouble navigating the dashboard and finding where my settings are located. I feel like I\'m wasting more time trying to manage the software than actually running my shop. I am thinking about switching to a simpler service.', 'Hi there, I am sorry to hear that you are finding the dashboard difficult to navigate and that it is impacting your shop\'s efficiency. I would love to help you get more comfortable with the platform before you make any decisions. We offer free 30-minute customer success check-ins where we can walk you through the dashboard and address your specific concerns. If you would still prefer to cancel, you can do so at any time via Account Settings → Subscription → Cancel Plan. Please note that if pricing or specific feature concerns are the reason for your frustration, I can escalate this to our Account Management team to discuss custom options or potential plan downgrades to better suit your needs.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hi there, I am sorry to hear that you are finding the dashboard difficult to navigate...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I want to schedule that success check-in call to go through settings. Thanks.&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-5">5</span></td>
@@ -1123,8 +1299,8 @@
               <td><span class="tag tag-blue">billing</span></td>
               <td>neutral</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="My credit card expired last week and I...">My credit card expired last week...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Hello, thank you for reaching out to us...">Hello, thank you for reaching...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">My credit card expired last week and I need to update my...</span><button class="btn-read-more" onclick="showModal('ticket_058', 'Billing — Neutral', 'My credit card expired last week and I need to update my payment information, but the portal keeps giving me an error. How can I pay my overdue invoice before my account gets suspended? Please let me know what I should do.', 'Hello, thank you for reaching out to us. I am sorry to hear you are experiencing technical difficulties while updating your payment information. You can manage your payment details at any time by navigating to Account Settings → Billing; if you continue to see an error, please try clearing your browser cache or using an incognito window. Please note that our system automatically retries failed payments up to three times over a seven-day period before an account is suspended, so we will attempt to process your payment again shortly. Once your payment method is successfully updated, you will be able to download your tax invoice directly from the Billing History section in your account settings. If you need further assistance, please let us know.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello, thank you for reaching out to us. I am sorry to hear you are experiencing technical difficulties...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I updated my card details and the payment went through successfully. Thank you!&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Hello, thank you for reaching out to us. I am sorry...</span><button class="btn-read-more" onclick="showModal('ticket_058', 'Billing — Neutral', 'My credit card expired last week and I need to update my payment information, but the portal keeps giving me an error. How can I pay my overdue invoice before my account gets suspended? Please let me know what I should do.', 'Hello, thank you for reaching out to us. I am sorry to hear you are experiencing technical difficulties while updating your payment information. You can manage your payment details at any time by navigating to Account Settings → Billing; if you continue to see an error, please try clearing your browser cache or using an incognito window. Please note that our system automatically retries failed payments up to three times over a seven-day period before an account is suspended, so we will attempt to process your payment again shortly. Once your payment method is successfully updated, you will be able to download your tax invoice directly from the Billing History section in your account settings. If you need further assistance, please let us know.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello, thank you for reaching out to us. I am sorry to hear you are experiencing technical difficulties...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I updated my card details and the payment went through successfully. Thank you!&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-4">4</span></td>
@@ -1141,8 +1317,8 @@
               <td><span class="tag tag-blue">billing</span></td>
               <td>confused</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Where can I find the option to update...">Where can I find the option...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Hello, thank you for reaching out...">Hello, thank you for reaching...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Where can I find the option to update my company's VAT...</span><button class="btn-read-more" onclick="showModal('ticket_059', 'Billing — Confused', 'Where can I find the option to update my company\'s VAT number on my billing profile? I need the information to appear correctly on all future invoices for tax purposes. I have looked everywhere but cannot locate the setting.', 'Hello, thank you for reaching out. I understand it can be confusing to navigate billing settings, and I would be happy to assist you with your VAT information. Please note that while you can manage your payment methods and download past tax invoices directly under Account Settings → Billing History, our system applies VAT based on the registered country of residence on your account. To update your company\'s VAT number for future invoices, please reply to this email with your updated tax details, and our billing team will manually update your profile. Once updated, your future invoices will reflect this information correctly.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello, thank you for reaching out. I understand it can be confusing to navigate billing settings...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;My VAT details are GB-8824192. Please apply this to future invoices. Thanks!&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Hello, thank you for reaching out. I understand it...</span><button class="btn-read-more" onclick="showModal('ticket_059', 'Billing — Confused', 'Where can I find the option to update my company\'s VAT number on my billing profile? I need the information to appear correctly on all future invoices for tax purposes. I have looked everywhere but cannot locate the setting.', 'Hello, thank you for reaching out. I understand it can be confusing to navigate billing settings, and I would be happy to assist you with your VAT information. Please note that while you can manage your payment methods and download past tax invoices directly under Account Settings → Billing History, our system applies VAT based on the registered country of residence on your account. To update your company\'s VAT number for future invoices, please reply to this email with your updated tax details, and our billing team will manually update your profile. Once updated, your future invoices will reflect this information correctly.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hello, thank you for reaching out. I understand it can be confusing to navigate billing settings...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;My VAT details are GB-8824192. Please apply this to future invoices. Thanks!&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-4">4</span></td>
@@ -1159,8 +1335,8 @@
               <td><span class="tag tag-blue">churn-risk</span></td>
               <td>neutral</td>
               <td><span class="tag tag-green">normal</span></td>
-              <td class="msg-cell"><div class="msg-truncate" title="I have been using your platform for six months...">I have been using your platform for...</div></td>
-              <td class="msg-cell"><div class="msg-truncate" title="Hi there, thank you for reaching out and sharing...">Hi there, thank you for reaching...</div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">I have been using your platform for six months, but the...</span><button class="btn-read-more" onclick="showModal('ticket_060', 'Churn-risk — Neutral', 'I have been using your platform for six months, but the recent price hike makes it difficult to justify the cost for my small team. We aren\'t using enough of the advanced features to warrant this new monthly rate. Please let me know how to proceed with cancelling my subscription.', 'Hi there, thank you for reaching out and sharing your feedback regarding our recent pricing. I understand that the new rates are challenging for a small team, especially when you aren\'t utilizing all of our advanced features. Before you proceed with cancellation, I would like to escalate your account to our Account Management team, as they have the authority to discuss custom pricing options that may better fit your needs. Alternatively, we offer a 30% discount for the next three months or the option to downgrade your plan without penalty. If you would prefer to discuss your specific product concerns, I am also happy to book a free 30-minute success check-in call with you. If you still wish to move forward with cancellation, you can do so at any time via Account Settings → Subscription → Cancel Plan.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hi there, thank you for reaching out and sharing your feedback regarding our recent pricing...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I will take the 30% discount option for the next 3 months. Thanks!&quot;}]')">Read</button></div></td>
+              <td><div class="msg-cell-content"><span class="msg-text-truncated">Hi there, thank you for reaching out and sharing your...</span><button class="btn-read-more" onclick="showModal('ticket_060', 'Churn-risk — Neutral', 'I have been using your platform for six months, but the recent price hike makes it difficult to justify the cost for my small team. We aren\'t using enough of the advanced features to warrant this new monthly rate. Please let me know how to proceed with cancelling my subscription.', 'Hi there, thank you for reaching out and sharing your feedback regarding our recent pricing. I understand that the new rates are challenging for a small team, especially when you aren\'t utilizing all of our advanced features. Before you proceed with cancellation, I would like to escalate your account to our Account Management team, as they have the authority to discuss custom pricing options that may better fit your needs. Alternatively, we offer a 30% discount for the next three months or the option to downgrade your plan without penalty. If you would prefer to discuss your specific product concerns, I am also happy to book a free 30-minute success check-in call with you. If you still wish to move forward with cancellation, you can do so at any time via Account Settings → Subscription → Cancel Plan.', '[{&quot;role&quot;: &quot;support&quot;, &quot;text&quot;: &quot;Hi there, thank you for reaching out and sharing your feedback regarding our recent pricing...&quot;}, {&quot;role&quot;: &quot;customer&quot;, &quot;text&quot;: &quot;I will take the 30% discount option for the next 3 months. Thanks!&quot;}]')">Read</button></div></td>
               <td><span class="conf-badge cb-high">high</span></td>
               <td><span class="score-chip sc-5">5</span></td>
               <td><span class="score-chip sc-5">5</span></td>
@@ -1178,6 +1354,32 @@
     </div>
   </div>
 
+</div>
+
+<!-- Modal Dialog -->
+<div class="modal-backdrop" id="emailModal" onclick="closeModalOnBackdrop(event)">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="modalTitle">Ticket Details</h2>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex; flex-direction:column; gap:1.25rem;">
+        <div class="modal-section">
+          <h3>First Customer Message</h3>
+          <div class="modal-text-box" id="modalCustomerMsg"></div>
+        </div>
+        <div class="modal-section">
+          <h3>First AI Generated Draft</h3>
+          <div class="modal-text-box" id="modalAiReply"></div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <h3>Simulated Multi-Turn Conversation Log</h3>
+        <div class="convo-container" id="modalChatHistory"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="footer">
@@ -1223,6 +1425,61 @@ function sortTable(col) {
   });
   rows.forEach(r => tbody.appendChild(r));
 }
+
+// Modal Functions
+function showModal(ticketId, metaInfo, customerMsg, aiReply, convoJsonStr) {
+  document.getElementById('modalTitle').textContent = `Ticket ${ticketId} [${metaInfo}]`;
+  document.getElementById('modalCustomerMsg').textContent = customerMsg;
+  document.getElementById('modalAiReply').textContent = aiReply;
+  
+  const chatContainer = document.getElementById('modalChatHistory');
+  chatContainer.innerHTML = '';
+  
+  try {
+    const convo = JSON.parse(convoJsonStr || '[]');
+    if (convo.length === 0) {
+      chatContainer.innerHTML = '<div style="color:var(--text-muted);font-size:0.8rem;padding:1rem;text-align:center;">No simulated turns generated for this ticket (abstained or single-turn).</div>';
+    } else {
+      convo.forEach(turn => {
+        const isSupport = turn.role === 'support' || turn.role === 'agent';
+        const bubble = document.createElement('div');
+        bubble.className = 'chat-bubble ' + (isSupport ? 'bubble-support' : 'bubble-customer');
+        
+        const roleDiv = document.createElement('div');
+        roleDiv.className = 'bubble-role';
+        roleDiv.textContent = isSupport ? 'AI Support Agent' : 'Simulated Customer';
+        
+        const textDiv = document.createElement('div');
+        textDiv.textContent = turn.text || turn.content || '';
+        
+        bubble.appendChild(roleDiv);
+        bubble.appendChild(textDiv);
+        chatContainer.appendChild(bubble);
+      });
+    }
+  } catch (e) {
+    chatContainer.innerHTML = '<div style="color:var(--red);font-size:0.8rem;padding:1rem;">Failed to parse simulated conversation log.</div>';
+  }
+  
+  document.getElementById('emailModal').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('emailModal').style.display = 'none';
+}
+
+function closeModalOnBackdrop(event) {
+  if (event.target === document.getElementById('emailModal')) {
+    closeModal();
+  }
+}
+
+// Close modal on Escape key press
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape') {
+    closeModal();
+  }
+});
 </script>
 
 </body>
